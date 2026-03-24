@@ -293,7 +293,7 @@
           <button class="refresh-btn" onclick="fetchRate()" title="Refresh">↺</button>
         </div>
         <div id="ticker-body"><div class="ticker-load">Fetching...</div></div>
-        <div class="ticker-note">Refreshes every 1s</div>
+        <div class="ticker-note">Refreshes every 5s</div>
       </div>
     </div>
   </div>
@@ -799,7 +799,7 @@ function esc(v) {
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
-setInterval(fetchRate, 1000);
+setInterval(fetchRate, 5000);
 fetchRate();
 buildTable();
 </script>
