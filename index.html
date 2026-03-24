@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Surebet Calculator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Light theme (default) ── */
+  :root {
+    --bg:              #f0f2f7;
+    --surface:         #ffffff;
+    --surface2:        #edf0f8;
+    --border:          #d4dae6;
+    --border-soft:     #e4e8f2;
+    --text:            #1a2035;
+    --text2:           #5a6480;
+    --text3:           #9aaabf;
+    --accent:          #5a20a8;
+    --accent-bg:       #f4f0ff;
+    --accent-border:   #c9b4f0;
+    --green:           #0f7030;
+    --green-bg:        #e6f7ed;
+    --green-border:    #6ecf91;
+    --red:             #b81c1c;
+    --red-bg:          #fdf0f0;
+    --red-border:      #e8a0a0;
+    --amber:           #8a4800;
+    --amber-bg:        #fff5e6;
+    --amber-border:    #f0c070;
+    --fix-on:          #c05010;
+    --fix-on-bg:       #fff0e6;
+    --fix-on-border:   #e09050;
+    --tfoot-bg:        #edf0f8;
+    --poly-td:         #faf8ff;
+    --inp-readonly-bg: #e8edf8;
+    --row-hover:       #f5f7fd;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  /* ── Dark theme ── */
+  .dark {
+    --bg:              #0f1117;
+    --surface:         #1a1d27;
+    --surface2:        #22263a;
+    --border:          #2e334a;
+    --border-soft:     #262b3d;
+    --text:            #e8eaf2;
+    --text2:           #8890b0;
+    --text3:           #4a5270;
+    --accent:          #9b6ff0;
+    --accent-bg:       #1f1535;
+    --accent-border:   #4a2888;
+    --green:           #3dd878;
+    --green-bg:        #0d2a1a;
+    --green-border:    #1e6640;
+    --red:             #f06060;
+    --red-bg:          #2a1010;
+    --red-border:      #6a2020;
+    --amber:           #f0a040;
+    --amber-bg:        #2a1c08;
+    --amber-border:    #6a4010;
+    --fix-on:          #f09050;
+    --fix-on-bg:       #2a1c08;
+    --fix-on-border:   #8a5020;
+    --tfoot-bg:        #1e2235;
+    --poly-td:         #1a1730;
+    --inp-readonly-bg: #1e2235;
+    --row-hover:       #1e2235;
+  }
+
+  body {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 18px 12px 48px;
+    line-height: 1.4;
+    transition: background .2s, color .2s;
+  }
+
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .hdr {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 14px;
+  }
+  .hdr h1 { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .hdr .sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  .hdr-right { display: flex; align-items: flex-start; gap: 10px; }
+
+  /* Theme toggle */
+  .theme-btn {
+    border: 1px solid var(--border); background: var(--surface2); color: var(--text2);
+    border-radius: 6px; padding: 7px 12px; cursor: pointer; font-size: 13px;
+    font-family: var(--sans); font-weight: 500; line-height: 1;
+    transition: background .15s, border-color .15s; white-space: nowrap;
+  }
+  .theme-btn:hover { background: var(--border); }
+
+  /* ── BRL Ticker ── */
+  .ticker {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 16px; min-width: 230px;
+    transition: background .2s, border-color .2s;
+  }
+  .ticker-top {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 11px; color: var(--text3); margin-bottom: 5px;
+  }
+  .ticker-price {
+    font-family: var(--mono); font-size: 22px; font-weight: 600;
+    color: var(--text); display: flex; align-items: baseline; gap: 8px;
+  }
+  .ticker-time { font-size: 11px; color: var(--text3); }
+  .ticker-note { font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .ticker-err  { font-size: 12px; color: var(--red); }
+  .ticker-load { font-size: 12px; color: var(--text3); font-style: italic; }
+
+  .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:5px; vertical-align:middle; }
+  .dot-ok   { background:#22bb44; }
+  .dot-err  { background:#cc2222; }
+  .dot-load { background:#888; animation:blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.25} }
+
+  .refresh-btn {
+    border:none; background:none; cursor:pointer; color:#4a90d9;
+    font-size:15px; padding:0 2px; line-height:1; transition:transform .2s;
+  }
+  .refresh-btn:hover { transform:rotate(180deg); }
+
+  /* ── Controls ── */
+  .controls {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 10px 16px; margin-bottom: 10px;
+    display: flex; flex-wrap: wrap; gap: 18px; align-items: center;
+    transition: background .2s, border-color .2s;
+  }
+  .ctrl-group { display:flex; align-items:center; gap:7px; }
+  .ctrl-label { font-size:12px; color:var(--text2); font-weight:500; }
+  .sep { width:1px; height:22px; background:var(--border); }
+
+  .btn {
+    border:1px solid var(--border); background:var(--surface2); color:var(--text2);
+    border-radius:4px; padding:4px 11px; cursor:pointer; font-size:12px;
+    font-family:var(--sans); font-weight:500; transition:background .15s;
+    min-width:32px; text-align:center;
+  }
+  .btn:hover { filter:brightness(1.08); }
+  .btn.on { background:#3a7fd5; color:#fff; border-color:#2a65b0; }
+
+  .ck {
+    display:flex; align-items:center; gap:6px; cursor:pointer;
+    user-select:none; font-size:12px; color:var(--text2);
+  }
+  .ck input { accent-color:#3a7fd5; cursor:pointer; }
+
+  /* ── Inputs ── */
+  input[type=number] {
+    border:1px solid var(--border); border-radius:4px;
+    padding:4px 8px; font-size:13px; font-family:var(--mono);
+    background:var(--surface); color:var(--text);
+    transition:border-color .15s, box-shadow .15s, background .2s;
+  }
+  input[type=number]:focus {
+    outline:none; border-color:#4a90d9;
+    box-shadow:0 0 0 2px rgba(74,144,217,.2);
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance:none; margin:0; }
+  input[type=number] { -moz-appearance:textfield; }
+
+  select {
+    border:1px solid var(--border); border-radius:4px;
+    padding:4px 7px; font-size:11px; font-family:var(--sans);
+    background:var(--surface); color:var(--text); cursor:pointer;
+    transition:background .2s, border-color .2s;
+  }
+  select:focus { outline:none; border-color:#4a90d9; }
+
+  /* ── Table ── */
+  .tbl-wrap {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; overflow:auto; margin-bottom:10px;
+    transition:background .2s, border-color .2s;
+  }
+  table { border-collapse:collapse; width:100%; }
+  th {
+    padding:7px 9px; background:var(--surface2); font-size:11px; font-weight:600;
+    color:var(--text2); white-space:nowrap; border:1px solid var(--border);
+    text-transform:uppercase; letter-spacing:.4px;
+  }
+  th.poly-th { background:var(--accent-bg); color:var(--accent); border-color:var(--accent-border); }
+  td { border:1px solid var(--border-soft); padding:5px 9px; vertical-align:middle; }
+  tbody tr:hover td { background:var(--row-hover); }
+  td.poly-td { background:var(--poly-td); }
+  .num-col { text-align:right; font-family:var(--mono); }
+  .ctr-col { text-align:center; }
+
+  /* ── Currency button ── */
+  .cur-btn {
+    border:1px solid; border-radius:4px; padding:3px 8px;
+    font-size:11px; font-family:var(--sans); cursor:pointer; font-weight:600;
+    transition:background .15s; white-space:nowrap;
+  }
+  .cur-usd { background:var(--green-bg); color:var(--green); border-color:var(--green-border); }
+  .cur-usd:hover { filter:brightness(1.1); }
+  .cur-brl { background:var(--amber-bg); color:var(--amber); border-color:var(--amber-border); }
+  .cur-brl:hover { filter:brightness(1.1); }
+
+  /* ── Fix button ── */
+  .fix-btn {
+    border:1px solid; border-radius:4px; padding:3px 9px;
+    font-size:12px; cursor:pointer; font-family:var(--sans);
+    transition:background .15s; min-width:36px;
+  }
+  .fix-off { background:var(--surface2); color:var(--text3); border-color:var(--border); }
+  .fix-off:hover { filter:brightness(1.08); }
+  .fix-on  { background:var(--fix-on-bg); color:var(--fix-on); border-color:var(--fix-on-border); font-weight:700; }
+  .fix-on:hover { filter:brightness(1.1); }
+
+  /* ── Stake input ── */
+  .stake-auto  { background:var(--surface)!important; font-weight:400!important; }
+  .stake-fixed { background:var(--fix-on-bg)!important; border-color:var(--fix-on-border)!important; font-weight:700!important; }
+
+  .fee-badge {
+    background:var(--amber-bg); color:var(--amber);
+    border-radius:3px; padding:1px 6px; font-size:11px; font-family:var(--mono);
+  }
+
+  /* ── Footer row ── */
+  tfoot td { background:var(--tfoot-bg)!important; font-weight:700; }
+
+  /* ── Profit cells ── */
+  .pos { color:var(--green); font-weight:700; }
+  .neg { color:var(--red);   font-weight:700; }
+  .dim { font-size:10px; color:var(--text3); font-family:var(--mono); }
+
+  /* ── Summary cards ── */
+  .cards { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+  .card {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; padding:9px 18px; min-width:130px;
+    transition:background .2s, border-color .2s;
+  }
+  .card-label { font-size:11px; color:var(--text3); margin-bottom:4px; text-transform:uppercase; letter-spacing:.4px; }
+  .card-value { font-size:15px; font-weight:700; font-family:var(--mono); }
+  .card.green { border-color:var(--green-border); }
+  .card.green .card-value { color:var(--green); }
+  .card.red   { border-color:var(--red-border);  }
+  .card.red   .card-value { color:var(--red);    }
+
+  /* ── Legend ── */
+  .legend {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:6px; padding:10px 16px; font-size:11px;
+    color:var(--text3); line-height:2;
+    transition:background .2s, border-color .2s;
+  }
+  code {
+    background:var(--accent-bg); color:var(--accent);
+    padding:1px 6px; border-radius:3px; font-family:var(--mono); font-size:11px;
+  }
+
+  .warn-bar {
+    background:var(--amber-bg); border:1px solid var(--amber-border);
+    color:var(--amber); border-radius:4px; padding:4px 10px; font-size:11px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div>
+      <h1>Surebet Calculator</h1>
+      <div class="sub">Polymarket fees: upcoming structure (from Mar 30 2026)</div>
+    </div>
+    <div class="hdr-right">
+      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">🌙 Dark</button>
+      <!-- BRL Ticker -->
+      <div class="ticker">
+        <div class="ticker-top">
+          <span><span class="dot dot-load" id="status-dot"></span>USDC/BRL — Binance live</span>
+          <button class="refresh-btn" onclick="fetchRate()" title="Refresh">↺</button>
+        </div>
+        <div id="ticker-body"><div class="ticker-load">Fetching...</div></div>
+        <div class="ticker-note">Refreshes every 15s</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="ctrl-group">
+      <span class="ctrl-label">Outcomes:</span>
+      <div id="outcome-btns" style="display:flex;gap:5px"></div>
+    </div>
+    <div class="sep"></div>
+    <label class="ck">
+      <input type="checkbox" id="show-comm" checked onchange="onShowCommChange()"/>
+      Show commissions
+    </label>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Round stakes to:</span>
+      <input type="number" id="round-to" min="0" step="1" placeholder="off"
+        style="width:60px;text-align:center" oninput="calc();updateDisplay()"/>
+    </div>
+    <div id="brl-warn" style="display:none" class="warn-bar">⚠ BRL rows need live rate — fetching…</div>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-wrap">
+    <table>
+      <thead id="thead"></thead>
+      <tbody id="tbody"></tbody>
+      <tfoot id="tfoot"></tfoot>
+    </table>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards" id="cards"></div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <strong style="color:var(--accent)">Polymarket taker fee (from Mar 30 2026):</strong>
+    <code>eff_rate = feeRate &times; (p &times; (1&minus;p))^exponent</code>
+    where p&nbsp;=&nbsp;1/odds — peaks at 50% probability.&nbsp;
+    <strong style="color:var(--text)">🔒 Fix</strong> one stake — all others auto-adjust for equal profit.
+    Calculations in USD; BRL shown via live Binance rate.
+  </div>
+</div>
+
+<script>
+// ── Polymarket categories ──────────────────────────────────────────────────
+const POLY_CATS = {
+  "None (free)":   { feeRate: 0,     exponent: 0   },
+  "Crypto":        { feeRate: 0.072, exponent: 1   },
+  "Sports":        { feeRate: 0.03,  exponent: 1   },
+  "Finance":       { feeRate: 0.04,  exponent: 1   },
+  "Politics":      { feeRate: 0.04,  exponent: 1   },
+  "Tech":          { feeRate: 0.04,  exponent: 1   },
+  "Culture":       { feeRate: 0.05,  exponent: 1   },
+  "Economics":     { feeRate: 0.03,  exponent: 0.5 },
+  "Weather":       { feeRate: 0.025, exponent: 0.5 },
+  "Other/General": { feeRate: 0.2,   exponent: 2   },
+  "Mentions":      { feeRate: 0.25,  exponent: 2   },
+  "Geopolitical":  { feeRate: 0,     exponent: 0   },
+};
+const CAT_KEYS = Object.keys(POLY_CATS);
+
+// ── State ──────────────────────────────────────────────────────────────────
+let numOut   = 2;
+let showComm = true;
+let nextId   = 3;
+let rows     = [makeRow(1), makeRow(2)];
+let usdcBrl  = null;
+let brlStatus   = "loading";
+let lastUpdated = null;
+let result      = null;
+let darkMode    = false;
+
+function makeRow(id) {
+  return { id, odds: "", comm: "0", usePoly: false, cat: "Sports",
+           currency: "USD", isFixed: false, fixedStake: "" };
+}
+
+// ── Math ───────────────────────────────────────────────────────────────────
+function calcEffOdds(raw, commPct, usePoly, catKey) {
+  if (!raw || raw <= 1) return null;
+  const ac = commPct > 0 ? raw * (1 - commPct / 100) + commPct / 100 : raw;
+  if (!usePoly) return ac;
+  const { feeRate, exponent } = POLY_CATS[catKey];
+  if (!feeRate) return ac;
+  const p = 1 / ac;
+  return 1 / (p * (1 + feeRate * Math.pow(p * (1 - p), exponent)));
+}
+
+function takerFeePct(raw, commPct, catKey) {
+  if (raw <= 1) return 0;
+  const ac = commPct > 0 ? raw * (1 - commPct / 100) + commPct / 100 : raw;
+  const { feeRate, exponent } = POLY_CATS[catKey];
+  if (!feeRate) return 0;
+  const p = 1 / ac;
+  return feeRate * Math.pow(p * (1 - p), exponent) * 100;
+}
+
+function f2(n) { return (typeof n === "number" && isFinite(n)) ? n.toFixed(2) : "—"; }
+function f3(n) { return (typeof n === "number" && isFinite(n)) ? n.toFixed(3) : "—"; }
+function f4(n) { return (typeof n === "number" && isFinite(n)) ? n.toFixed(4) : "—"; }
+
+function toDisplay(usdAmt, currency) {
+  if (currency === "USD") return usdAmt;
+  return usdcBrl ? usdAmt * usdcBrl : null;
+}
+function toUSD(amt, currency) {
+  if (currency === "USD") return amt;
+  return usdcBrl ? amt / usdcBrl : amt;
+}
+function currSym(c) { return c === "USD" ? "$" : "R$"; }
+
+// ── Theme ──────────────────────────────────────────────────────────────────
+function toggleTheme() {
+  darkMode = !darkMode;
+  document.body.classList.toggle("dark", darkMode);
+  document.getElementById("theme-btn").textContent = darkMode ? "☀️ Light" : "🌙 Dark";
+}
+
+// ── BRL fetch cascade ──────────────────────────────────────────────────────
+async function fetchRate() {
+  updateDot("loading");
+  const attempts = [
+    () => fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL", { cache: "no-store" })
+            .then(r => r.json()).then(d => ({ price: parseFloat(d.price), src: "Binance USDCBRL" })),
+    () => fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL", { cache: "no-store" })
+            .then(r => r.json()).then(d => ({ price: parseFloat(d.price), src: "Binance USDTBRL" })),
+    () => fetch("https://open.er-api.com/v6/latest/USD", { cache: "no-store" })
+            .then(r => r.json()).then(d => ({ price: d.rates.BRL, src: "ExchangeRate-API" })),
+    () => fetch("https://api.frankfurter.app/latest?base=USD&symbols=BRL", { cache: "no-store" })
+            .then(r => r.json()).then(d => ({ price: d.rates.BRL, src: "Frankfurter/ECB" })),
+  ];
+  for (const fn of attempts) {
+    try {
+      const { price, src } = await fn();
+      if (price > 0) { gotRate(price, src); return; }
+    } catch (_) {}
+  }
+  brlStatus = "error";
+  updateDot("error");
+  document.getElementById("ticker-body").innerHTML =
+    `<div class="ticker-err">Failed to fetch — check connection</div>`;
+  updateDisplay();
+}
+
+function gotRate(price, source) {
+  usdcBrl     = price;
+  brlStatus   = "ok";
+  lastUpdated = new Date();
+  updateDot("ok");
+  document.getElementById("ticker-body").innerHTML =
+    `<div class="ticker-price">R$ ${usdcBrl.toFixed(4)}<span class="ticker-time">${lastUpdated.toLocaleTimeString("en-US")}</span></div>
+     <div style="font-size:10px;color:var(--text3);margin-top:2px">Source: ${source}</div>`;
+  calc();
+  updateDisplay();
+}
+
+function updateDot(s) {
+  document.getElementById("status-dot").className =
+    `dot dot-${s === "ok" ? "ok" : s === "error" ? "err" : "load"}`;
+}
+
+// ── Outcome buttons ────────────────────────────────────────────────────────
+(function () {
+  const wrap = document.getElementById("outcome-btns");
+  [2, 3, 4, 5, 6].forEach(n => {
+    const b = document.createElement("button");
+    b.className = "btn" + (n === numOut ? " on" : "");
+    b.textContent = n;
+    b.style.minWidth = "32px";
+    b.onclick = () => {
+      numOut = n;
+      while (rows.length < numOut) rows.push(makeRow(nextId++));
+      rows = rows.slice(0, numOut);
+      wrap.querySelectorAll(".btn").forEach(x => x.classList.remove("on"));
+      b.classList.add("on");
+      calc();
+      buildTable();
+    };
+    wrap.appendChild(b);
+  });
+})();
+
+function onShowCommChange() {
+  showComm = document.getElementById("show-comm").checked;
+  buildTable();
+}
+
+// ── Calc ───────────────────────────────────────────────────────────────────
+function calc() {
+  const effArr = rows.map(r =>
+    calcEffOdds(parseFloat(r.odds), parseFloat(r.comm) || 0, r.usePoly, r.cat)
+  );
+
+  if (!effArr.every(o => o !== null && o > 1)) { result = null; return; }
+
+  const invSum    = effArr.reduce((s, o) => s + 1 / o, 0);
+  const margin    = invSum;
+  const isSurebet = margin < 1;
+
+  const fixIdx = rows.findIndex(r => r.isFixed);
+  let target;
+  if (fixIdx >= 0) {
+    const fs = parseFloat(rows[fixIdx].fixedStake);
+    target = (isFinite(fs) && fs > 0)
+      ? toUSD(fs, rows[fixIdx].currency) * effArr[fixIdx]
+      : 100 / invSum;
+  } else {
+    target = 100 / invSum;
+  }
+
+  let stakesUSD = effArr.map(o => target / o);
+  const rv = parseFloat(document.getElementById("round-to").value);
+  if (rv > 0) stakesUSD = stakesUSD.map(s => Math.ceil(s / rv) * rv);
+
+  const totalUSD   = stakesUSD.reduce((a, b) => a + b, 0);
+  const returnsUSD = stakesUSD.map((s, i) => s * effArr[i]);
+  const profitsUSD = returnsUSD.map(ret => ret - totalUSD);
+  const minProfit  = Math.min(...profitsUSD);
+  const roi        = (minProfit / totalUSD) * 100;
+
+  result = { margin, isSurebet, effArr, stakesUSD, totalUSD, returnsUSD, profitsUSD, minProfit, roi };
+}
+
+// ── buildTable — full structural rebuild (no typing involved) ──────────────
+function buildTable() {
+  // thead
+  let h = `<tr>
+    <th style="width:28px">#</th>
+    <th>Odds</th>`;
+  if (showComm) h += `<th>Commission %</th><th class="num-col">Adj. Odds</th>`;
+  h += `
+    <th class="poly-th ctr-col">Poly</th>
+    <th class="poly-th">Category</th>
+    <th class="poly-th num-col">Taker Fee</th>
+    <th class="ctr-col">Currency</th>
+    <th>Stake</th>
+    <th class="ctr-col" style="width:44px">Fix</th>
+    <th class="num-col">Profit</th>
+  </tr>`;
+  document.getElementById("thead").innerHTML = h;
+
+  // tbody — only static structure; computed cells filled by updateDisplay()
+  document.getElementById("tbody").innerHTML = rows.map((row, idx) => {
+    const cur     = row.currency;
+    const catOpts = CAT_KEYS.map(k =>
+      `<option value="${k}"${row.cat === k ? " selected" : ""}>${k}</option>`
+    ).join("");
+
+    let commCols = "";
+    if (showComm) {
+      commCols = `
+        <td>
+          <div style="display:flex;align-items:center;gap:4px">
+            <input type="number" step="0.1" min="0" max="50"
+              value="${esc(row.comm)}" style="width:56px;text-align:right"
+              oninput="onCommInput(${row.id},this.value)"/>
+            <span style="color:var(--text3)">%</span>
+          </div>
+        </td>
+        <td class="num-col" id="ao-${row.id}" style="color:var(--text2)">—</td>`;
+    }
+
+    return `<tr>
+      <td class="ctr-col" style="color:var(--text3);font-weight:700">${idx + 1}</td>
+      <td>
+        <input type="number" step="0.01" min="1.01" placeholder="2.00"
+          value="${esc(row.odds)}" style="width:84px;text-align:right"
+          oninput="onOddsInput(${row.id},this.value)"/>
+      </td>
+      ${commCols}
+      <td class="poly-td ctr-col">
+        <input type="checkbox" ${row.usePoly ? "checked" : ""}
+          onchange="onPolyChange(${row.id},this.checked)"/>
+      </td>
+      <td class="poly-td">
+        <select id="catsel-${row.id}" ${row.usePoly ? "" : "disabled"}
+          onchange="onCatChange(${row.id},this.value)"
+          style="width:100%;max-width:128px;${row.usePoly ? "" : "color:var(--text3)"}">
+          ${catOpts}
+        </select>
+      </td>
+      <td class="poly-td num-col" id="fee-${row.id}"><span style="color:var(--text3)">—</span></td>
+      <td class="ctr-col">
+        <button id="curbtn-${row.id}"
+          class="cur-btn ${cur === "USD" ? "cur-usd" : "cur-brl"}"
+          onclick="toggleCur(${row.id})">${cur === "USD" ? "$ USD" : "R$ BRL"}</button>
+      </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span id="cursym-${row.id}" style="font-size:11px;color:var(--text3);min-width:20px">${currSym(cur)}</span>
+          <input type="number" step="0.01" min="0" placeholder="auto"
+            id="stake-${row.id}" style="width:88px;text-align:right"
+            class="${row.isFixed ? "stake-fixed" : "stake-auto"}"
+            value="${esc(row.isFixed ? row.fixedStake : "")}"
+            oninput="onStakeInput(${row.id},this.value)"/>
+        </div>
+      </td>
+      <td class="ctr-col" id="fixcell-${row.id}"></td>
+      <td class="num-col" id="profit-${row.id}">—</td>
+    </tr>`;
+  }).join("");
+
+  updateDisplay();
+}
+
+// ── updateDisplay — patch computed cells only, never rebuilds inputs ────────
+function updateDisplay() {
+  rows.forEach((row, idx) => {
+    const raw  = parseFloat(row.odds);
+    const comm = parseFloat(row.comm) || 0;
+
+    // Adj odds
+    if (showComm) {
+      const el = document.getElementById(`ao-${row.id}`);
+      if (el) {
+        const ac = raw > 1 && comm > 0 ? raw * (1 - comm / 100) + comm / 100 : raw;
+        el.textContent = raw > 1 ? f4(ac) : "—";
+      }
+    }
+
+    // Taker fee
+    const feeEl = document.getElementById(`fee-${row.id}`);
+    if (feeEl) {
+      const fp = row.usePoly ? takerFeePct(raw, comm, row.cat) : 0;
+      feeEl.innerHTML = row.usePoly && fp > 0
+        ? `<span class="fee-badge">${fp.toFixed(3)}%</span>`
+        : `<span style="color:var(--text3)">—</span>`;
+    }
+
+    // Stake input — only update value when NOT focused and NOT fixed
+    const stakeEl = document.getElementById(`stake-${row.id}`);
+    if (stakeEl) {
+      if (!row.isFixed) {
+        stakeEl.className = "stake-auto";
+        if (document.activeElement !== stakeEl) {
+          const sUSD = result?.stakesUSD[idx];
+          if (sUSD !== undefined) {
+            const v = toDisplay(sUSD, row.currency);
+            stakeEl.value = v !== null ? f2(v) : "";
+          } else {
+            stakeEl.value = "";
+          }
+        }
+      } else {
+        stakeEl.className = "stake-fixed";
+      }
+    }
+
+    // Fix button — always visible, one active at a time (radio behaviour)
+    const fixEl = document.getElementById(`fixcell-${row.id}`);
+    if (fixEl) {
+      fixEl.innerHTML = `<button class="fix-btn ${row.isFixed ? "fix-on" : "fix-off"}"
+        onclick="toggleFix(${row.id})"
+        title="${row.isFixed ? "Unfix — auto-adjust" : "Fix this stake"}">${row.isFixed ? "🔒" : "🔓"}</button>`;
+    }
+
+    // Profit cell
+    const profEl = document.getElementById(`profit-${row.id}`);
+    if (profEl) {
+      if (result) {
+        const pUSD = result.profitsUSD[idx];
+        const cur  = row.currency;
+        const pDisp = toDisplay(pUSD, cur);
+        const sign  = pUSD >= 0 ? "+" : "";
+        const cls   = pUSD >= -0.005 ? "pos" : "neg";
+        const mainStr = pDisp !== null
+          ? `${sign}${currSym(cur)} ${Math.abs(pDisp).toFixed(2)}`
+          : `${sign}$${Math.abs(pUSD).toFixed(2)}`;
+        // If BRL, also show USD in dim
+        const subStr = cur === "BRL"
+          ? `<div class="dim">${sign}$${f2(Math.abs(pUSD))}</div>` : "";
+        profEl.innerHTML = `<span class="${cls}">${pUSD < 0 ? "-" : "+"}${currSym(cur)} ${pDisp !== null ? Math.abs(pDisp).toFixed(2) : f2(Math.abs(pUSD))}</span>${subStr}`;
+      } else {
+        profEl.textContent = "—";
+      }
+    }
+  });
+
+  // Footer
+  const tfoot = document.getElementById("tfoot");
+  if (!result) {
+    tfoot.innerHTML = "";
+  } else {
+    // cols: # + odds + (comm+adj if showComm) + poly + cat + fee + cur = 7 or 9
+    const baseCols = showComm ? 9 : 7;
+    const pSign = result.minProfit >= 0 ? "+" : "";
+    const pCls  = result.minProfit >= -0.005 ? "pos" : "neg";
+    tfoot.innerHTML = `<tr>
+      <td colspan="${baseCols}" style="text-align:right;color:var(--text2)">Total stake (USD):</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-size:11px;color:var(--text3)">$</span>
+          <input readonly value="${f2(result.totalUSD)}"
+            style="width:88px;text-align:right;background:var(--inp-readonly-bg);font-weight:700;
+                   cursor:default;border:1px solid var(--border);border-radius:4px;
+                   padding:4px 8px;font-family:var(--mono);font-size:13px;color:var(--text)"/>
+        </div>
+      </td>
+      <td class="ctr-col"><!-- fix col --></td>
+      <td class="num-col">
+        <span class="${pCls}" style="font-family:var(--mono)">${pSign}$${f2(result.minProfit)}</span>
+        ${usdcBrl ? `<div class="dim">${pSign}R$${f2(result.minProfit * usdcBrl)}</div>` : ""}
+      </td>
+    </tr>`;
+  }
+
+  // Cards
+  const cards = document.getElementById("cards");
+  if (!result) {
+    cards.innerHTML = "";
+  } else {
+    const ok = result.isSurebet, cl = ok ? "green" : "red";
+    let h = `
+      <div class="card ${cl}"><div class="card-label">Verdict</div><div class="card-value">${ok ? "✓ SUREBET" : "✗ No arb"}</div></div>
+      <div class="card ${cl}"><div class="card-label">Margin</div><div class="card-value">${(result.margin * 100).toFixed(3)}%</div></div>
+      <div class="card"><div class="card-label">Total (USD)</div><div class="card-value">$${f2(result.totalUSD)}</div></div>`;
+    if (usdcBrl) h += `<div class="card"><div class="card-label">Total (BRL)</div><div class="card-value">R$ ${f2(result.totalUSD * usdcBrl)}</div></div>`;
+    h += `
+      <div class="card ${cl}"><div class="card-label">Min. Profit</div><div class="card-value">${result.minProfit >= 0 ? "+" : ""}$${f2(result.minProfit)}</div></div>
+      <div class="card ${cl}"><div class="card-label">ROI</div><div class="card-value">${f3(result.roi)}%</div></div>`;
+    cards.innerHTML = h;
+  }
+
+  // BRL warning
+  document.getElementById("brl-warn").style.display =
+    (rows.some(r => r.currency === "BRL") && !usdcBrl) ? "" : "none";
+}
+
+// ── Input handlers — only updateDisplay(), never rebuild ───────────────────
+function onOddsInput(id, value) {
+  rows.find(r => r.id === id).odds = value;
+  calc(); updateDisplay();
+}
+
+function onCommInput(id, value) {
+  rows.find(r => r.id === id).comm = value;
+  calc(); updateDisplay();
+}
+
+function onStakeInput(id, value) {
+  // Typing a stake: lock this row, unlock all others
+  rows.forEach(r => { if (r.id !== id) { r.isFixed = false; r.fixedStake = ""; } });
+  const row = rows.find(r => r.id === id);
+  row.fixedStake = value;
+  row.isFixed    = true;
+  calc(); updateDisplay();
+}
+
+// ── Non-input handlers — updateDisplay() is enough ────────────────────────
+function onPolyChange(id, checked) {
+  const row = rows.find(r => r.id === id);
+  row.usePoly = checked;
+  const sel = document.getElementById(`catsel-${id}`);
+  if (sel) { sel.disabled = !checked; sel.style.color = checked ? "" : "var(--text3)"; }
+  calc(); updateDisplay();
+}
+
+function onCatChange(id, value) {
+  rows.find(r => r.id === id).cat = value;
+  calc(); updateDisplay();
+}
+
+function toggleCur(id) {
+  const row = rows.find(r => r.id === id);
+  row.currency   = row.currency === "USD" ? "BRL" : "USD";
+  row.isFixed    = false;
+  row.fixedStake = "";
+  const cur = row.currency;
+  const btn = document.getElementById(`curbtn-${id}`);
+  const sym = document.getElementById(`cursym-${id}`);
+  if (btn) { btn.className = `cur-btn ${cur === "USD" ? "cur-usd" : "cur-brl"}`; btn.textContent = cur === "USD" ? "$ USD" : "R$ BRL"; }
+  if (sym) sym.textContent = currSym(cur);
+  // Clear stake display
+  const stakeEl = document.getElementById(`stake-${id}`);
+  if (stakeEl) stakeEl.value = "";
+  calc(); updateDisplay();
+}
+
+function toggleFix(id) {
+  const row = rows.find(r => r.id === id);
+  if (row.isFixed) {
+    // Unfix
+    row.isFixed    = false;
+    row.fixedStake = "";
+  } else {
+    // Lock this row, unlock all others
+    rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; });
+    const idx  = rows.findIndex(r => r.id === id);
+    const sUSD = result?.stakesUSD[idx];
+    const v    = sUSD !== undefined ? f2(toDisplay(sUSD, row.currency) ?? sUSD) : "";
+    row.isFixed    = true;
+    row.fixedStake = v;
+    const el = document.getElementById(`stake-${id}`);
+    if (el) { el.value = v; el.className = "stake-fixed"; }
+  }
+  calc(); updateDisplay();
+}
+
+function esc(v) {
+  return (v == null) ? "" : String(v).replace(/"/g, "&quot;");
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+setInterval(fetchRate, 15000);
+fetchRate();
+buildTable();
+</script>
+</body>
+</html>
