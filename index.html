@@ -288,7 +288,7 @@
       <!-- BRL Ticker -->
       <div class="ticker">
         <div class="ticker-top">
-          <span><span class="dot dot-load" id="status-dot"></span>USDC/BRL — Binance live</span>
+          <span><span class="dot dot-load" id="status-dot"></span>USDC/BRL</span>
           <button class="refresh-btn" onclick="fetchRate()" title="Refresh">↺</button>
         </div>
         <div id="ticker-body"><div class="ticker-load">Fetching...</div></div>
@@ -437,8 +437,7 @@ function gotRate(price, source) {
   lastUpdated = new Date();
   updateDot("ok");
   document.getElementById("ticker-body").innerHTML =
-    `<div class="ticker-price">R$ ${usdcBrl.toFixed(4)}<span class="ticker-time">${lastUpdated.toLocaleTimeString("en-US")}</span></div>
-     <div style="font-size:10px;color:var(--text3);margin-top:2px">Source: ${source}</div>`;
+    `<div class="ticker-price">R$${usdcBrl.toFixed(4)}<span class="ticker-time">${lastUpdated.toLocaleTimeString("en-US")}</span></div>`;
   calc();
   updateDisplay();
 }
