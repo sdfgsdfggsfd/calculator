@@ -922,8 +922,9 @@ function updateDisplay() {
   }
 
   // FOOTER
-  const colCount = 5 + (showComm ? 2 : 0) + 4;
-  const colsBeforeStake = colCount - 2;
+  // Cols: # B/L Odds Prob% [Comm% Eff.Odds] Poly Cat Fee Currency Stake Fix Profit
+  const colCount = 11 + (showComm ? 2 : 0);
+  const colsBeforeStake = colCount - 3; // exclude Stake, Fix, Profit
   const totalInputActive = document.activeElement?.id === "total-stake-input";
 
   if (!totalInputActive) {
