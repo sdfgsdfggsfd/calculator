@@ -128,21 +128,15 @@
 
   /* ─── HEADER ─── */
   .hdr {
-    display: flex; align-items: flex-start;
-    justify-content: space-between; flex-wrap: wrap;
-    gap: 14px; margin-bottom: 20px;
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    position: relative; z-index: 1;
   }
-  .hdr-brand { display: flex; flex-direction: column; gap: 4px; }
-  .hdr-brand h1 {
-    font-family: 'Syne', sans-serif; font-size: 30px;
-    font-weight: 800; letter-spacing: -1.5px; line-height: 1; color: var(--text);
-  }
-  .hdr-brand h1 em { font-style: normal; color: var(--cyan); }
-  .hdr-brand .sub {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9.5px; color: var(--text3); letter-spacing: .14em; text-transform: uppercase;
-  }
-  .hdr-right { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .hdr-brand { flex-shrink: 0; }
+  .hdr-center { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; position: absolute; left: 50%; transform: translateX(-50%); }
+  .hdr-right  { flex-shrink: 0; }
 
   .theme-btn {
     background: var(--surface); border: 1px solid var(--border);
@@ -367,29 +361,31 @@
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <!-- ── HEADER ── -->
-  <div class="hdr">
-    <div class="hdr-brand">
-      <img src="logo.png" alt="Logo" style="height:48px;width:auto;display:block;">
-    </div>
-    <div class="hdr-right">
-      <div id="roi-badge" class="roi-badge" style="display:none">—</div>
-      <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
-      <div class="ticker-wrap">
-        <div class="ticker">
-          <div class="ticker-top">
-            <span><span class="dot dot-load" id="dot-brl"></span>USD/BRL</span>
-            <button class="refresh-btn" onclick="fetchRates()" title="Atualizar">↺</button>
-          </div>
-          <div id="ticker-brl"><div class="ticker-load">Buscando…</div></div>
-          <div class="ticker-note">↻ 5s</div>
+<!-- ── HEADER (full-width, outside wrap) ── -->
+<div class="hdr">
+  <div class="hdr-brand">
+    <img src="logo.png" alt="Logo" style="height:48px;width:auto;display:block;">
+  </div>
+  <div class="hdr-center">
+    <div class="ticker-wrap">
+      <div class="ticker">
+        <div class="ticker-top">
+          <span><span class="dot dot-load" id="dot-brl"></span>USD/BRL</span>
+          <button class="refresh-btn" onclick="fetchRates()" title="Atualizar">↺</button>
         </div>
-
+        <div id="ticker-brl"><div class="ticker-load">Buscando…</div></div>
+        <div class="ticker-note">↻ 5s</div>
       </div>
     </div>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
   </div>
+  <div class="hdr-right">
+    <div id="roi-badge" class="roi-badge" style="display:none">—</div>
+  </div>
+</div>
+
+<div class="wrap">
 
   <!-- ── CONTROLS ── -->
   <div class="controls">
