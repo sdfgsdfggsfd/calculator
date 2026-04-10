@@ -342,18 +342,6 @@
   .actions .btn.primary { background: var(--cyan-dim); border-color: rgba(34,211,238,.3); color: var(--cyan); }
   .actions .btn.primary:hover { background: rgba(34,211,238,.14); border-color: var(--cyan); }
 
-  /* ─── LEGEND ─── */
-  .legend {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 12px 16px;
-    font-size: 11px; color: var(--text3); line-height: 1.8;
-  }
-  .legend strong { color: var(--poly); font-weight: 600; }
-  .legend code {
-    font-family: 'JetBrains Mono',monospace; background: var(--surface2);
-    border: 1px solid var(--border); border-radius: var(--r-xs);
-    padding: 1px 7px; font-size: 10.5px; color: var(--cyan);
-  }
   .warn-bar { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); border-radius: var(--r-sm); padding: 5px 12px; font-size: 12px; }
 
   /* ─── RESPONSIVE ─── */
@@ -404,7 +392,7 @@
       <select class="fork-select" id="fork-type" onchange="onForkChange()"></select>
     </div>
     <div class="ctrl-sep"></div>
-    <button class="btn on" id="show-comm-btn" onclick="toggleShowComm()">Hide commissions</button>
+    <button class="btn" id="show-comm-btn" onclick="toggleShowComm()">Show commissions</button>
 
     <div id="brl-warn" style="display:none" class="warn-bar">⚠ BRL rows need live rate</div>
   </div>
@@ -429,13 +417,6 @@
     <button class="btn" onclick="resetAll()">Reset all</button>
   </div>
 
-  <!-- ── LEGEND ── -->
-  <div class="legend">
-    <strong>Back bet eff. odds:</strong> <code>1 + (odds−1) × (1 − commission%)</code> &nbsp;·&nbsp;
-    <strong>Lay bet eff. odds:</strong> <code>odds − commission%</code><br>
-    <strong>Polymarket taker fee (desde 30/03/2026):</strong> <code>eff_rate = feeRate × (p × (1−p))^exponent</code> onde p = 1/odds.<br>
-    <strong>Lay stake</strong> shown = backer's stake on exchange; <strong>Liability</strong> = backer_stake × (lay_odds − 1).
-  </div>
 
 </div>
 
@@ -478,7 +459,7 @@ const CURR_SYMS = { USD:"$", BRL:"R$" };
 
 // ====================== STATE ======================
 let numOut     = 2;
-let showComm   = true;
+let showComm   = false;
 let roundValue = 0;
 let roundUseFx = false;
 let nextId     = 3;
@@ -488,14 +469,16 @@ let lastUpdated = null;
 let result      = null;
 let darkMode    = true;
 let forkType    = "1-2";
+let totalStakeOverride = null;
 
 function makeRow(id) {
   return {
-    id, odds:"", comm:"0",
+    id, odds:"2", comm:"0",
     betType:"back",     // "back" | "lay"
     usePoly:false, cat:"Sports",
     currency:"USD", isFixed:false, fixedStake:"",
-    manualStake: null   // user-typed override when another row is the fixed anchor
+    manualStake: null,   // user-typed override when another row is the fixed anchor
+    customRate: null     // custom BRL/USD rate for display on USD rows
   };
 }
 
@@ -687,7 +670,8 @@ function calc() {
     else usdFixed = raw;
     target = usdFixed * effArr[fixIdx];
   } else {
-    target = 100 / invSum;
+    const desiredTotal = totalStakeOverride !== null ? totalStakeOverride : 100;
+    target = desiredTotal / invSum;
   }
 
   let stakesUSD = effArr.map(o => target / o);
@@ -813,7 +797,18 @@ function buildTable() {
         })() : `<span style="color:var(--text3)">—</span>`}
       </td>
       <td class="ctr-col">
-        <button class="cur-btn" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":"R$ BRL"}</button>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <button class="cur-btn" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":"R$ BRL"}</button>
+          ${cur==="USD" ? `<div style="display:flex;align-items:center;gap:3px">
+            <span style="font:400 9px/1 'JetBrains Mono',monospace;color:var(--text3)">R$/&dollar;</span>
+            <input type="number" min="0.01" step="0.01"
+              style="width:64px;font-size:11px;padding:3px 5px;text-align:right"
+              placeholder="${rates.BRL ? rates.BRL.toFixed(2) : 'rate'}"
+              value="${row.customRate !== null ? row.customRate : ''}"
+              oninput="onCustomRate(${row.id},this.value)"
+              title="Cotação USD/BRL personalizada para esta linha">
+          </div>` : ""}
+        </div>
       </td>
       <td>
         <div style="display:flex;flex-direction:column;gap:3px">
@@ -825,6 +820,7 @@ function buildTable() {
               placeholder="${isLay?"Backer stake":"Your stake"}">
           </div>
           ${liabHtml}
+          <div id="brl-hint-${row.id}" class="dim" style="padding-left:2px;display:none"></div>
         </div>
       </td>
       <td class="ctr-col" id="fixcell-${row.id}">
@@ -847,6 +843,24 @@ function updateDisplay() {
   }
 
   rows.forEach((row, i) => {
+    // Prob cell update
+    const probEl = document.getElementById(`prob-${row.id}`);
+    if (probEl) {
+      probEl.innerHTML = (parseFloat(row.odds)||0) > 1 ? (100/(parseFloat(row.odds))).toFixed(1)+"%" : "—";
+    }
+
+    // Fee cell update
+    const feeEl = document.getElementById(`fee-${row.id}`);
+    if (feeEl) {
+      const isLay = row.betType === "lay";
+      if (!isLay && row.usePoly) {
+        const fp = takerFeePct(parseFloat(row.odds)||0, parseFloat(row.comm)||0, row.cat);
+        feeEl.innerHTML = fp > 0 ? `<span class="fee-badge">${fp.toFixed(3)}%</span>` : `<span style="color:var(--text3)">—</span>`;
+      } else {
+        feeEl.innerHTML = `<span style="color:var(--text3)">—</span>`;
+      }
+    }
+
     // Profit cell
     const profEl = document.getElementById(`profit-${row.id}`);
     if (profEl) {
@@ -865,6 +879,21 @@ function updateDisplay() {
     if (stakeEl && !row.isFixed && row.manualStake === null && document.activeElement !== stakeEl) {
       const v = toDisplay(result.stakesUSD[i], row.currency);
       stakeEl.value = v !== null ? f2(v) : "";
+    }
+
+    // BRL hint for USD rows with customRate (or show with live rate when filled)
+    const brlHint = document.getElementById(`brl-hint-${row.id}`);
+    if (brlHint && row.currency === "USD") {
+      const activeRate = row.customRate || null;
+      if (activeRate) {
+        const usdAmt = result.stakesUSD[i];
+        brlHint.textContent = `≈ R$${f2(usdAmt * activeRate)}`;
+        brlHint.style.display = "";
+      } else {
+        brlHint.style.display = "none";
+      }
+    } else if (brlHint) {
+      brlHint.style.display = "none";
     }
 
     // Liability update (for lay rows)
@@ -888,25 +917,47 @@ function updateDisplay() {
     }
   });
 
+  // Total stake input sync (don't override while user is editing)
+  const totalInput = document.getElementById("total-stake-input");
+  if (totalInput && document.activeElement !== totalInput) {
+    totalInput.value = f2(result.totalUSD);
+  }
+
   // FOOTER
-  const colCount = 5 + (showComm ? 2 : 0) + 4; // #, B/L, odds, prob, [comm,eff], poly×3, cur, stake, fix, profit
-  const colsBeforeStake = colCount - 2; // stake + profit remain
-  document.getElementById("tfoot").innerHTML = `
-    <tr>
-      <td colspan="${colsBeforeStake}" style="text-align:right;color:var(--text2);font:500 12px/1 'DM Sans',sans-serif">
-        Total stake (USD):</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:4px">
-          <span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px">$</span>
-          <input readonly value="${f2(result.totalUSD)}" style="width:92px;text-align:right;font-weight:700">
-        </div>
-      </td>
-      <td></td>
-      <td class="num-col">
+  const colCount = 5 + (showComm ? 2 : 0) + 4;
+  const colsBeforeStake = colCount - 2;
+  const totalInputActive = document.activeElement?.id === "total-stake-input";
+
+  if (!totalInputActive) {
+    document.getElementById("tfoot").innerHTML = `
+      <tr>
+        <td colspan="${colsBeforeStake}" style="text-align:right;color:var(--text2);font:500 12px/1 'DM Sans',sans-serif">
+          Total stake (USD):</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px">$</span>
+            <input type="number" id="total-stake-input" min="0.01" step="0.01"
+              value="${f2(result.totalUSD)}"
+              style="width:92px;text-align:right;font-weight:700"
+              title="Edite para distribuir o total entre as apostas"
+              oninput="onTotalStakeInput(this.value)">
+          </div>
+        </td>
+        <td></td>
+        <td class="num-col" id="tfoot-profit">
+          <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
+          ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}
+        </td>
+      </tr>`;
+  } else {
+    // Only update the profit cell without touching the focused input
+    const profitCell = document.getElementById("tfoot-profit");
+    if (profitCell) {
+      profitCell.innerHTML = `
         <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
-        ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}
-      </td>
-    </tr>`;
+        ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}`;
+    }
+  }
 
   // CARDS
   document.getElementById("cards").innerHTML = `
@@ -950,22 +1001,14 @@ function onCatChange(id, val) { rows.find(r=>r.id===id).cat = val; calc(); updat
 
 function onStakeInput(id, val) {
   const row = rows.find(r=>r.id===id);
+  totalStakeOverride = null;
 
   if (row.isFixed) {
-    // Updating the already-fixed anchor row — just update its value, keep manual stakes intact
+    // Row already explicitly fixed — update the anchor value
     row.fixedStake = val;
   } else {
-    const existingFixed = rows.find(r => r.isFixed);
-    if (existingFixed) {
-      // There's already an anchor — treat this as a manual override (0 is valid)
-      row.manualStake = (val === "" || val === null) ? null : val;
-    } else {
-      // No anchor yet — this row becomes the new anchor
-      rows.forEach(r => { if (r.id !== id) { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; } });
-      row.isFixed    = true;
-      row.fixedStake = val;
-      row.manualStake = null;
-    }
+    // Never auto-fix on typing; store as manual override only
+    row.manualStake = (val === "" || val === null) ? null : val;
   }
   calc(); updateDisplay();
 }
@@ -981,6 +1024,7 @@ function cycleCur(id) {
   const row = rows.find(r=>r.id===id);
   const order = ["USD","BRL"];
   const next  = order[(order.indexOf(row.currency)+1) % order.length];
+  row.customRate = null; // reset custom rate on currency change
   if (row.isFixed && row.fixedStake) {
     // convert fixed stake to new currency
     const usd = toUSD(parseFloat(row.fixedStake), row.currency);
@@ -1011,13 +1055,42 @@ function toggleFix(id) {
     row.isFixed = false; row.fixedStake = "";
   } else {
     rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; });
+    totalStakeOverride = null;
     row.isFixed = true;
-    const idx  = rows.indexOf(row);
-    const usd  = result ? result.stakesUSD[idx] : 0;
-    const disp = fromUSD(usd, row.currency);
-    row.fixedStake = f2(disp ?? usd);
+    // Prefer: already-typed manual stake → current DOM input value → calc result
+    const stakeEl = document.getElementById(`stake-${id}`);
+    const typedVal = row.manualStake !== null && row.manualStake !== ""
+      ? row.manualStake
+      : (stakeEl && stakeEl.value !== "" ? stakeEl.value : null);
+    if (typedVal !== null) {
+      row.fixedStake = typedVal;
+    } else {
+      const idx  = rows.indexOf(row);
+      const usd  = result ? result.stakesUSD[idx] : 0;
+      const disp = fromUSD(usd, row.currency);
+      row.fixedStake = f2(disp ?? usd);
+    }
+    row.manualStake = null;
   }
   calc(); buildTable();
+}
+
+function onCustomRate(id, val) {
+  const row = rows.find(r=>r.id===id);
+  row.customRate = (val === "" || val === null) ? null : parseFloat(val) || null;
+  updateDisplay();
+}
+
+function onTotalStakeInput(val) {
+  const parsed = parseFloat(val);
+  if (!isNaN(parsed) && parsed > 0) {
+    totalStakeOverride = parsed;
+    rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; });
+    calc(); updateDisplay();
+  } else if (val === "" || val === null) {
+    totalStakeOverride = null;
+    calc(); updateDisplay();
+  }
 }
 
 // ====================== UTILITIES ======================
@@ -1034,6 +1107,9 @@ function shareOdds() {
     params.set(`poly${i}`, r.usePoly ? "1" : "0");
     params.set(`cat${i}`, r.cat);
     params.set(`cur${i}`, r.currency);
+    params.set(`fx${i}`, r.isFixed ? "1" : "0");
+    if (r.isFixed && r.fixedStake) params.set(`fxs${i}`, r.fixedStake);
+    if (r.customRate !== null) params.set(`cr${i}`, r.customRate);
   });
   const url = `${location.origin}${location.pathname}?${params.toString()}`;
   navigator.clipboard.writeText(url).then(() => {
@@ -1061,6 +1137,9 @@ function loadFromURL() {
     r.usePoly = params.get(`poly${i}`) === "1";
     r.cat     = params.get(`cat${i}`) || "Sports";
     r.currency= params.get(`cur${i}`) || "USD";
+    r.isFixed = params.get(`fx${i}`) === "1";
+    r.fixedStake = r.isFixed ? (params.get(`fxs${i}`) || "") : "";
+    r.customRate = params.has(`cr${i}`) ? parseFloat(params.get(`cr${i}`)) || null : null;
     rows.push(r);
   }
   nextId = n + 1;
@@ -1075,9 +1154,9 @@ function loadFromURL() {
 function loadExample() {
   numOut = 3; forkType = "1-X-2";
   rows = [
-    {id:1, odds:"2.12", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
-    {id:2, odds:"3.55", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
-    {id:3, odds:"4.10", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""}
+    {id:1, odds:"2.12", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null},
+    {id:2, odds:"3.55", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null},
+    {id:3, odds:"4.10", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null}
   ];
   nextId = 4;
   document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="3"));
@@ -1089,8 +1168,8 @@ function loadExample() {
 function loadLayExample() {
   numOut = 2; forkType = "1-X2";
   rows = [
-    {id:1, odds:"2.40", comm:"0",   betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
-    {id:2, odds:"2.10", comm:"5",   betType:"lay",  usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""}
+    {id:1, odds:"2.40", comm:"0",   betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null},
+    {id:2, odds:"2.10", comm:"5",   betType:"lay",  usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null}
   ];
   nextId = 3;
   document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
@@ -1102,12 +1181,12 @@ function loadLayExample() {
 function resetAll() {
   numOut = 2; forkType = "1-2";
   rows = [makeRow(1), makeRow(2)];
-  nextId = 3; roundValue = 0; roundUseFx = false;
+  nextId = 3; roundValue = 0; roundUseFx = false; totalStakeOverride = null;
   document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
   buildForkSelect();
-  showComm = true;
-  document.getElementById("show-comm-btn").textContent = "Hide commissions";
-  document.getElementById("show-comm-btn").classList.add("on");
+  showComm = false;
+  document.getElementById("show-comm-btn").textContent = "Show commissions";
+  document.getElementById("show-comm-btn").classList.remove("on");
   calc(); buildTable();
 }
 
@@ -1117,8 +1196,9 @@ fetchRates();
 loadFromURL();
 buildTable();
 
-// button initial states
-document.getElementById("show-comm-btn").classList.add("on");
+// button initial states — show-comm is OFF by default
+document.getElementById("show-comm-btn").textContent = "Show commissions";
+document.getElementById("show-comm-btn").classList.remove("on");
 
 // theme persistence
 const storedTheme = localStorage.getItem("darkMode");
