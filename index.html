@@ -50,8 +50,6 @@
     --lay-bg:      rgba(244,114,182,.08);
     --lay-border:  rgba(244,114,182,.28);
     --lay-glow:    rgba(244,114,182,.15);
-    --eur:         #fbbf24;
-    --eur-bg:      rgba(251,191,36,.07);
     --tfoot-bg:    #07101e;
     --inp-ro:      rgba(255,255,255,.04);
     --row-hover:   rgba(255,255,255,.018);
@@ -206,16 +204,6 @@
   .btn:hover { border-color: var(--text2); color: var(--text); }
   .btn.on { background: var(--cyan-dim); border-color: rgba(34,211,238,.35); color: var(--cyan); }
 
-  /* round-to input in controls */
-  .round-input {
-    width: 52px; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--r-sm); padding: 4px 7px; font: 400 12px/1 'JetBrains Mono',monospace;
-    color: var(--text); transition: border-color .15s; -moz-appearance: textfield;
-  }
-  .round-input::-webkit-outer-spin-button,.round-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-  .round-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(34,211,238,.08); }
-  .round-input:disabled { opacity: .4; cursor: not-allowed; }
-
   /* fork-type select in controls */
   .fork-select {
     background: var(--surface2); border: 1px solid var(--border);
@@ -285,7 +273,6 @@
     color: var(--text2); font-family: 'JetBrains Mono',monospace; font-weight: 600;
   }
   .cur-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-  .cur-btn.eur { border-color: rgba(251,191,36,.3); color: var(--eur); background: rgba(251,191,36,.06); }
 
   /* back/lay toggle */
   .bl-btn {
@@ -400,12 +387,7 @@
           <div id="ticker-brl"><div class="ticker-load">Buscando…</div></div>
           <div class="ticker-note">↻ 5s</div>
         </div>
-        <div class="ticker">
-          <div class="ticker-top">
-            <span><span class="dot dot-load" id="dot-eur"></span>USD/EUR</span>
-          </div>
-          <div id="ticker-eur"><div class="ticker-load">Buscando…</div></div>
-        </div>
+
       </div>
     </div>
   </div>
@@ -423,13 +405,7 @@
     </div>
     <div class="ctrl-sep"></div>
     <button class="btn on" id="show-comm-btn" onclick="toggleShowComm()">Hide commissions</button>
-    <div class="ctrl-sep"></div>
-    <div class="ctrl-group">
-      <span class="ctrl-label">Round to</span>
-      <button class="btn on" id="round-off-btn" onclick="setRound(0)">Off</button>
-      <input type="number" class="round-input" id="round-custom" min="0.01" step="0.01" placeholder="e.g. 1" disabled oninput="onRoundInput(this.value)" title="Round up stakes to nearest">
-      <button class="btn" id="round-fx-btn" onclick="toggleRoundFx()" title="Apply FX rounding in BRL then convert back">FX round: OFF</button>
-    </div>
+
     <div id="brl-warn" style="display:none" class="warn-bar">⚠ BRL rows need live rate</div>
   </div>
 
@@ -447,7 +423,7 @@
 
   <!-- ── ACTIONS ── -->
   <div class="actions">
-    <button class="btn primary" onclick="copyStakes()" id="copy-btn">📋 Copy stakes</button>
+    <button class="btn primary" onclick="shareOdds()" id="copy-btn">🔗 Share odds</button>
     <button class="btn" onclick="loadExample()">Example 3-way sports</button>
     <button class="btn" onclick="loadLayExample()">Example back/lay</button>
     <button class="btn" onclick="resetAll()">Reset all</button>
@@ -459,7 +435,6 @@
     <strong>Lay bet eff. odds:</strong> <code>odds − commission%</code><br>
     <strong>Polymarket taker fee (desde 30/03/2026):</strong> <code>eff_rate = feeRate × (p × (1−p))^exponent</code> onde p = 1/odds.<br>
     <strong>Lay stake</strong> shown = backer's stake on exchange; <strong>Liability</strong> = backer_stake × (lay_odds − 1).
-    Round uses Math.ceil. FX round: converts → rounds in BRL → converts back.
   </div>
 
 </div>
@@ -499,7 +474,7 @@ const FORK_TYPES_N = [
   { id:"multi",    label:"Multi-way",        hint:"4+ outcomes" },
 ];
 
-const CURR_SYMS = { USD:"$", EUR:"€", BRL:"R$" };
+const CURR_SYMS = { USD:"$", BRL:"R$" };
 
 // ====================== STATE ======================
 let numOut     = 2;
@@ -508,7 +483,7 @@ let roundValue = 0;
 let roundUseFx = false;
 let nextId     = 3;
 let rows       = [makeRow(1), makeRow(2)];
-let rates      = { USD: 1, EUR: null, BRL: null };
+let rates      = { USD: 1, BRL: null };
 let lastUpdated = null;
 let result      = null;
 let darkMode    = true;
@@ -565,7 +540,6 @@ function f2(n) { return (typeof n==="number" && isFinite(n)) ? n.toFixed(2) : "�
 
 function toDisplay(usdAmt, currency) {
   if (currency === "USD") return usdAmt;
-  if (currency === "EUR") return rates.EUR ? usdAmt * rates.EUR : null;
   if (currency === "BRL") return rates.BRL ? usdAmt * rates.BRL : null;
   return null;
 }
@@ -580,65 +554,54 @@ function toggleTheme() {
 
 // ====================== RATE FETCHER ======================
 async function fetchRates() {
-  ["dot-brl","dot-eur"].forEach(id => {
+  ["dot-brl"].forEach(id => {
     document.getElementById(id).className = "dot dot-load";
   });
 
   const attempts = [
     async () => {
-      const [brlRes, eurRes] = await Promise.all([
-        fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL",{cache:"no-store"}).then(r=>r.json()),
-        fetch("https://api.binance.com/api/v3/ticker/price?symbol=EURUSDT",{cache:"no-store"}).then(r=>r.json()),
-      ]);
+      const brlRes = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL",{cache:"no-store"}).then(r=>r.json());
       const brl = parseFloat(brlRes.price);
-      const eurUsd = parseFloat(eurRes.price);    // EUR per USD
-      return { brl, eur: 1/eurUsd, src:"Binance" };
+      return { brl, src:"Binance" };
     },
     async () => {
       const d = await fetch("https://open.er-api.com/v6/latest/USD").then(r=>r.json());
-      return { brl: d.rates.BRL, eur: d.rates.EUR, src:"ExchangeRate-API" };
+      return { brl: d.rates.BRL, src:"ExchangeRate-API" };
     },
     async () => {
-      const d = await fetch("https://api.frankfurter.app/latest?base=USD&symbols=BRL,EUR").then(r=>r.json());
-      return { brl: d.rates.BRL, eur: d.rates.EUR, src:"Frankfurter/ECB" };
+      const d = await fetch("https://api.frankfurter.app/latest?base=USD&symbols=BRL").then(r=>r.json());
+      return { brl: d.rates.BRL, src:"Frankfurter/ECB" };
     },
   ];
 
   for (const fn of attempts) {
     try {
-      const { brl, eur, src } = await fn();
-      if (brl > 0 && eur > 0) {
-        gotRates(brl, eur, src); return;
+      const { brl, src } = await fn();
+      if (brl > 0) {
+        gotRates(brl, src); return;
       }
     } catch (_) {}
   }
 
-  // Fallback: try existing USDT/BRL + hardcode EUR
+  // Fallback: try existing USDT/BRL
   try {
     const d = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL",{cache:"no-store"}).then(r=>r.json());
     const brl = parseFloat(d.price);
-    if (brl > 0) { gotRates(brl, rates.EUR || 0.92, "Binance USDT"); return; }
+    if (brl > 0) { gotRates(brl, "Binance USDT"); return; }
   } catch (_) {}
 
   document.getElementById("ticker-brl").innerHTML = `<div style="color:var(--red);font-size:11px;font-family:'JetBrains Mono',monospace">Falha</div>`;
-  document.getElementById("ticker-eur").innerHTML = `<div style="color:var(--red);font-size:11px;font-family:'JetBrains Mono',monospace">Falha</div>`;
-  ["dot-brl","dot-eur"].forEach(id => { document.getElementById(id).className = "dot dot-err"; });
+  ["dot-brl"].forEach(id => { document.getElementById(id).className = "dot dot-err"; });
 }
 
-function gotRates(brl, eur, source) {
+function gotRates(brl, source) {
   rates.BRL = brl;
-  rates.EUR = eur;
   lastUpdated = new Date();
   const t = lastUpdated.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
 
   document.getElementById("dot-brl").className = "dot dot-ok";
   document.getElementById("ticker-brl").innerHTML = `
     <div class="ticker-price">R$${brl.toFixed(4)}<span class="ticker-time">${t}</span></div>
-    <div class="ticker-source">${source}</div>`;
-
-  document.getElementById("dot-eur").className = "dot dot-ok";
-  document.getElementById("ticker-eur").innerHTML = `
-    <div class="ticker-price">€${eur.toFixed(4)}<span class="ticker-time">${t}</span></div>
     <div class="ticker-source">${source}</div>`;
 
   calc(); updateDisplay();
@@ -701,35 +664,6 @@ function toggleShowComm() {
   buildTable();
 }
 
-function setRound(val) {
-  roundValue = val;
-  const inp = document.getElementById("round-custom");
-  if (val === 0) {
-    inp.value = ""; inp.disabled = true;
-    document.getElementById("round-off-btn").classList.add("on");
-  } else {
-    inp.disabled = false;
-    inp.value = val;
-    document.getElementById("round-off-btn").classList.remove("on");
-  }
-  calc(); updateDisplay();
-}
-
-function onRoundInput(val) {
-  const v = parseFloat(val);
-  roundValue = (v > 0) ? v : 0;
-  document.getElementById("round-off-btn").classList.toggle("on", roundValue === 0);
-  calc(); updateDisplay();
-}
-
-function toggleRoundFx() {
-  roundUseFx = !roundUseFx;
-  const btn = document.getElementById("round-fx-btn");
-  btn.textContent = roundUseFx ? "FX round: ON" : "FX round: OFF";
-  btn.classList.toggle("on", roundUseFx);
-  calc(); updateDisplay();
-}
-
 // ====================== CALC ======================
 function calc() {
   const effArr = rows.map(r =>
@@ -749,7 +683,6 @@ function calc() {
     // Convert fixed stake to USD
     let usdFixed;
     if (fRow.currency === "USD") usdFixed = raw;
-    else if (fRow.currency === "EUR") usdFixed = rates.EUR ? raw / rates.EUR : raw;
     else if (fRow.currency === "BRL") usdFixed = rates.BRL ? raw / rates.BRL : raw;
     else usdFixed = raw;
     target = usdFixed * effArr[fixIdx];
@@ -766,7 +699,6 @@ function calc() {
       if (raw !== null && !isNaN(raw)) {
         let usdManual;
         if (r.currency === "USD") usdManual = raw;
-        else if (r.currency === "EUR") usdManual = rates.EUR ? raw / rates.EUR : raw;
         else if (r.currency === "BRL") usdManual = rates.BRL ? raw / rates.BRL : raw;
         else usdManual = raw;
         stakesUSD[i] = usdManual;
@@ -781,11 +713,6 @@ function calc() {
         const brl     = s * rates.BRL;
         const rounded = Math.ceil(brl / roundValue) * roundValue;
         return rounded / rates.BRL;
-      }
-      if (roundUseFx && row.currency === "EUR" && rates.EUR) {
-        const eur     = s * rates.EUR;
-        const rounded = Math.ceil(eur / roundValue) * roundValue;
-        return rounded / rates.EUR;
       }
       return Math.ceil(s / roundValue) * roundValue;
     });
@@ -886,7 +813,7 @@ function buildTable() {
         })() : `<span style="color:var(--text3)">—</span>`}
       </td>
       <td class="ctr-col">
-        <button class="cur-btn ${cur==="EUR"?"eur":""}" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":cur==="EUR"?"€ EUR":"R$ BRL"}</button>
+        <button class="cur-btn" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":"R$ BRL"}</button>
       </td>
       <td>
         <div style="display:flex;flex-direction:column;gap:3px">
@@ -978,7 +905,6 @@ function updateDisplay() {
       <td class="num-col">
         <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
         ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}
-        ${rates.EUR?`<div class="dim">€${f2(result.minProfit*rates.EUR)}</div>`:""}
       </td>
     </tr>`;
 
@@ -996,7 +922,6 @@ function updateDisplay() {
       <div class="card-label">Total USD</div>
       <div class="card-value">$${f2(result.totalUSD)}</div>
     </div>
-    ${rates.EUR?`<div class="card"><div class="card-label">Total EUR</div><div class="card-value">€${f2(result.totalUSD*rates.EUR)}</div></div>`:""}
     ${rates.BRL?`<div class="card"><div class="card-label">Total BRL</div><div class="card-value">R$${f2(result.totalUSD*rates.BRL)}</div></div>`:""}
     <div class="card ${result.isSurebet?"green":"red"}">
       <div class="card-label">Min Profit</div>
@@ -1054,7 +979,7 @@ function toggleBL(id) {
 
 function cycleCur(id) {
   const row = rows.find(r=>r.id===id);
-  const order = ["USD","EUR","BRL"];
+  const order = ["USD","BRL"];
   const next  = order[(order.indexOf(row.currency)+1) % order.length];
   if (row.isFixed && row.fixedStake) {
     // convert fixed stake to new currency
@@ -1071,13 +996,11 @@ function cycleCur(id) {
 
 function toUSD(amt, cur) {
   if (cur==="USD") return amt;
-  if (cur==="EUR") return rates.EUR ? amt / rates.EUR : amt;
   if (cur==="BRL") return rates.BRL ? amt / rates.BRL : amt;
   return amt;
 }
 function fromUSD(usd, cur) {
   if (cur==="USD") return usd;
-  if (cur==="EUR") return rates.EUR ? usd * rates.EUR : null;
   if (cur==="BRL") return rates.BRL ? usd * rates.BRL : null;
   return null;
 }
@@ -1098,29 +1021,55 @@ function toggleFix(id) {
 }
 
 // ====================== UTILITIES ======================
-function copyStakes() {
-  if (!result) return alert("No stakes to copy — enter odds first.");
-  let txt = "Surebet Stakes\n";
-  txt += `Fork type: ${forkType}\n\n`;
-  rows.forEach((r,i) => {
-    const usd  = result.stakesUSD[i];
-    const disp = fromUSD(usd, r.currency);
-    const sym  = CURR_SYMS[r.currency];
-    txt += `Outcome ${i+1} [${r.betType.toUpperCase()}]: ${sym}${f2(disp??usd)} ${r.currency}`;
-    if (r.betType==="lay") {
-      const raw  = parseFloat(r.odds)||0;
-      const liab = usd * (raw - 1);
-      txt += `  (Liability: ${sym}${f2(fromUSD(liab,r.currency)??liab)})`;
-    }
-    txt += `\n`;
+// ====================== SHARE ODDS ======================
+function shareOdds() {
+  if (!rows.some(r => r.odds)) return alert("Enter odds first.");
+  const params = new URLSearchParams();
+  params.set("n", numOut);
+  params.set("ft", forkType);
+  rows.forEach((r, i) => {
+    params.set(`o${i}`, r.odds);
+    params.set(`c${i}`, r.comm);
+    params.set(`bt${i}`, r.betType);
+    params.set(`poly${i}`, r.usePoly ? "1" : "0");
+    params.set(`cat${i}`, r.cat);
+    params.set(`cur${i}`, r.currency);
   });
-  txt += `\nTotal USD: $${f2(result.totalUSD)}\nMin Profit: +$${f2(result.minProfit)}\nROI: ${result.roi.toFixed(2)}%`;
-  navigator.clipboard.writeText(txt).then(() => {
+  const url = `${location.origin}${location.pathname}?${params.toString()}`;
+  navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById("copy-btn");
     const orig = btn.textContent;
-    btn.textContent = "✅ Copied!";
-    setTimeout(() => btn.textContent = orig, 1800);
+    btn.textContent = "✅ Link copied!";
+    setTimeout(() => btn.textContent = orig, 2000);
+  }).catch(() => {
+    prompt("Copy this link:", url);
   });
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(location.search);
+  if (!params.has("n")) return;
+  const n = parseInt(params.get("n")) || 2;
+  numOut = n;
+  forkType = params.get("ft") || "1-2";
+  rows = [];
+  for (let i = 0; i < n; i++) {
+    const r = makeRow(i + 1);
+    r.odds    = params.get(`o${i}`)   || "";
+    r.comm    = params.get(`c${i}`)   || "0";
+    r.betType = params.get(`bt${i}`)  || "back";
+    r.usePoly = params.get(`poly${i}`) === "1";
+    r.cat     = params.get(`cat${i}`) || "Sports";
+    r.currency= params.get(`cur${i}`) || "USD";
+    rows.push(r);
+  }
+  nextId = n + 1;
+  document.querySelectorAll("#outcome-btns button").forEach(b =>
+    b.classList.toggle("on", parseInt(b.textContent) === n)
+  );
+  buildForkSelect();
+  document.getElementById("fork-type").value = forkType;
+  calc(); buildTable();
 }
 
 function loadExample() {
@@ -1156,10 +1105,6 @@ function resetAll() {
   nextId = 3; roundValue = 0; roundUseFx = false;
   document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
   buildForkSelect();
-  document.getElementById("round-off-btn").classList.add("on");
-  document.getElementById("round-custom").value = ""; document.getElementById("round-custom").disabled = true;
-  document.getElementById("round-fx-btn").textContent = "FX round: OFF";
-  document.getElementById("round-fx-btn").classList.remove("on");
   showComm = true;
   document.getElementById("show-comm-btn").textContent = "Hide commissions";
   document.getElementById("show-comm-btn").classList.add("on");
@@ -1169,10 +1114,10 @@ function resetAll() {
 // ====================== INIT ======================
 setInterval(fetchRates, 5000);
 fetchRates();
+loadFromURL();
 buildTable();
 
 // button initial states
-document.getElementById("round-off-btn").classList.add("on");
 document.getElementById("show-comm-btn").classList.add("on");
 
 // theme persistence
