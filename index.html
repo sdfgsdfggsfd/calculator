@@ -769,7 +769,7 @@ function buildTable() {
             <span style="font:400 9px/1 'JetBrains Mono',monospace;color:var(--text3)">R$/&dollar;</span>
             <input type="number" min="0.01" step="any"
               style="width:64px;font-size:11px;padding:3px 5px;text-align:right"
-              placeholder="${rates.BRL ? rates.BRL.toFixed(2) : 'rate'}"
+              placeholder="${rates.BRL ? rates.BRL.toFixed(4) : 'rate'}"
               value="${row.customRate !== null ? row.customRate : ''}"
               oninput="onCustomRate(${row.id},this.value)">
           </div>` : ""}
