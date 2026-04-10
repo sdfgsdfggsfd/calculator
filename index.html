@@ -302,8 +302,9 @@
     transition: all .2s;
     white-space: nowrap; align-self: center;
   }
-  .roi-badge.arb  { background: var(--green-bg); border-color: var(--green-border); color: var(--green-bright); box-shadow: 0 0 14px var(--green-glow); }
-  .roi-badge.noarb { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
+  .roi-badge.arb     { background: var(--green-bg); border-color: var(--green-border); color: var(--green-bright); box-shadow: 0 0 14px var(--green-glow); }
+  .roi-badge.noarb   { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
+  .roi-badge.neutral { background: var(--surface2); border-color: var(--border);        color: var(--text2); }
 
   /* ─── SITE FOOTER ─── */
   .site-footer {
@@ -927,7 +928,8 @@ function updateDisplay() {
   if (roiBadge) {
     roiBadge.style.display = "";
     roiBadge.textContent = result.roi.toFixed(2) + "%";
-    roiBadge.className = "roi-badge " + (result.isSurebet ? "arb" : "noarb");
+    const roiClass = result.isSurebet ? "arb" : (Math.abs(result.roi) < 0.005 ? "neutral" : "noarb");
+    roiBadge.className = "roi-badge " + roiClass;
   }
 
   document.getElementById("brl-warn").style.display =
