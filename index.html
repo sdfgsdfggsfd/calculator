@@ -412,8 +412,6 @@
   <!-- ── ACTIONS ── -->
   <div class="actions">
     <button class="btn primary" onclick="shareOdds()" id="copy-btn">🔗 Share odds</button>
-    <button class="btn" onclick="loadExample()">Example 3-way sports</button>
-    <button class="btn" onclick="loadLayExample()">Example back/lay</button>
     <button class="btn" onclick="resetAll()">Reset all</button>
   </div>
 
@@ -1146,33 +1144,6 @@ function loadFromURL() {
   document.querySelectorAll("#outcome-btns button").forEach(b =>
     b.classList.toggle("on", parseInt(b.textContent) === n)
   );
-  buildForkSelect();
-  document.getElementById("fork-type").value = forkType;
-  calc(); buildTable();
-}
-
-function loadExample() {
-  numOut = 3; forkType = "1-X-2";
-  rows = [
-    {id:1, odds:"2.12", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null},
-    {id:2, odds:"3.55", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null},
-    {id:3, odds:"4.10", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null}
-  ];
-  nextId = 4;
-  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="3"));
-  buildForkSelect();
-  document.getElementById("fork-type").value = forkType;
-  calc(); buildTable();
-}
-
-function loadLayExample() {
-  numOut = 2; forkType = "1-X2";
-  rows = [
-    {id:1, odds:"2.40", comm:"0",   betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null},
-    {id:2, odds:"2.10", comm:"5",   betType:"lay",  usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:"", manualStake:null, customRate:null}
-  ];
-  nextId = 3;
-  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
   buildForkSelect();
   document.getElementById("fork-type").value = forkType;
   calc(); buildTable();
