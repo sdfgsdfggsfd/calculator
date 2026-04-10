@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="format-detection" content="telephone=no">
 <title>Surebet Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,69 +15,51 @@
      DESIGN TOKENS
   ═══════════════════════════════════════════ */
   :root {
-    /* surfaces */
     --bg:          #060b16;
     --surface:     #0b1324;
     --surface2:    #0f1b30;
     --surface3:    #14213a;
     --border:      #1a2d46;
     --border-soft: #112035;
-
-    /* text */
-    --text:  #cdd9ef;
-    --text2: #4d6882;
-    --text3: #283a50;
-
-    /* brand accent – electric cyan */
-    --cyan:      #22d3ee;
-    --cyan-dim:  rgba(34,211,238,.09);
-    --cyan-glow: rgba(34,211,238,.18);
-
-    /* profit green */
-    --green:        #10b981;
-    --green-bright: #34d399;
-    --green-bg:     rgba(16,185,129,.07);
-    --green-border: rgba(16,185,129,.22);
-    --green-glow:   rgba(16,185,129,.25);
-
-    /* loss red */
-    --red:        #f43f5e;
-    --red-bg:     rgba(244,63,94,.07);
-    --red-border: rgba(244,63,94,.22);
-    --red-glow:   rgba(244,63,94,.2);
-
-    /* amber */
-    --amber:        #f59e0b;
-    --amber-bg:     rgba(245,158,11,.08);
-    --amber-border: rgba(245,158,11,.28);
-
-    /* polymarket violet */
+    --text:        #cdd9ef;
+    --text2:       #4d6882;
+    --text3:       #283a50;
+    --cyan:        #22d3ee;
+    --cyan-dim:    rgba(34,211,238,.09);
+    --cyan-glow:   rgba(34,211,238,.18);
+    --green:       #10b981;
+    --green-bright:#34d399;
+    --green-bg:    rgba(16,185,129,.07);
+    --green-border:rgba(16,185,129,.22);
+    --green-glow:  rgba(16,185,129,.25);
+    --red:         #f43f5e;
+    --red-bg:      rgba(244,63,94,.07);
+    --red-border:  rgba(244,63,94,.22);
+    --red-glow:    rgba(244,63,94,.2);
+    --amber:       #f59e0b;
+    --amber-bg:    rgba(245,158,11,.08);
+    --amber-border:rgba(245,158,11,.28);
     --poly:        #a78bfa;
     --poly-bg:     rgba(167,139,250,.07);
     --poly-border: rgba(167,139,250,.18);
     --poly-glow:   rgba(167,139,250,.15);
-
-    /* fixed stake orange */
-    --fix:        #fb923c;
-    --fix-bg:     rgba(251,146,60,.08);
-    --fix-border: rgba(251,146,60,.28);
-
-    /* misc */
+    --fix:         #fb923c;
+    --fix-bg:      rgba(251,146,60,.08);
+    --fix-border:  rgba(251,146,60,.28);
+    --lay:         #f472b6;
+    --lay-bg:      rgba(244,114,182,.08);
+    --lay-border:  rgba(244,114,182,.28);
+    --lay-glow:    rgba(244,114,182,.15);
+    --eur:         #fbbf24;
+    --eur-bg:      rgba(251,191,36,.07);
     --tfoot-bg:    #07101e;
     --inp-ro:      rgba(255,255,255,.04);
     --row-hover:   rgba(255,255,255,.018);
-
-    /* typography */
-    --mono:    'JetBrains Mono', monospace;
-    --sans:    'DM Sans', sans-serif;
-    --display: 'Syne', sans-serif;
-
     --r:    10px;
     --r-sm: 6px;
     --r-xs: 4px;
   }
 
-  /* ── LIGHT MODE ── */
   .light {
     --bg:           #edf1fa;
     --surface:      #ffffff;
@@ -104,6 +87,9 @@
     --poly:         #6d28d9;
     --poly-bg:      rgba(109,40,217,.07);
     --poly-border:  rgba(109,40,217,.2);
+    --lay:          #db2777;
+    --lay-bg:       rgba(219,39,119,.07);
+    --lay-border:   rgba(219,39,119,.25);
     --fix-bg:       rgba(234,88,12,.07);
     --fix-border:   rgba(234,88,12,.28);
     --tfoot-bg:     #d8e8f8;
@@ -111,11 +97,8 @@
     --row-hover:    rgba(79,70,229,.03);
   }
 
-  /* ═══════════════════════════════════════════
-     BASE
-  ═══════════════════════════════════════════ */
   body {
-    font-family: var(--sans);
+    font-family: var(--sans,'DM Sans',sans-serif);
     font-size: 13px;
     color: var(--text);
     background: var(--bg);
@@ -124,471 +107,274 @@
     line-height: 1.5;
     transition: background .28s, color .28s;
   }
-
-  /* ambient depth layers */
   body::before {
     content: '';
     position: fixed; inset: 0;
     background:
       radial-gradient(ellipse 65% 45% at 95%  0%, rgba(34,211,238,.055) 0%, transparent 55%),
       radial-gradient(ellipse 55% 50% at  0% 100%, rgba(167,139,250,.04) 0%, transparent 55%);
-    pointer-events: none;
-    z-index: 0;
+    pointer-events: none; z-index: 0;
   }
+  .wrap { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
 
-  .wrap {
-    max-width: 1180px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ═══════════════════════════════════════════
-     PAGE-LOAD ANIMATION
-  ═══════════════════════════════════════════ */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .wrap > * {
-    animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both;
-  }
+  .wrap > * { animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both; }
   .wrap > *:nth-child(1) { animation-delay: .00s; }
   .wrap > *:nth-child(2) { animation-delay: .06s; }
   .wrap > *:nth-child(3) { animation-delay: .10s; }
   .wrap > *:nth-child(4) { animation-delay: .14s; }
   .wrap > *:nth-child(5) { animation-delay: .18s; }
-  .wrap > *:nth-child(6) { animation-delay: .22s; }
-  .wrap > *:nth-child(7) { animation-delay: .26s; }
 
-  /* ═══════════════════════════════════════════
-     HEADER
-  ═══════════════════════════════════════════ */
+  /* ─── HEADER ─── */
   .hdr {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 20px;
+    display: flex; align-items: flex-start;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 14px; margin-bottom: 20px;
   }
-
   .hdr-brand { display: flex; flex-direction: column; gap: 4px; }
-
   .hdr-brand h1 {
-    font-family: var(--display);
-    font-size: 30px;
-    font-weight: 800;
-    letter-spacing: -1.5px;
-    line-height: 1;
-    color: var(--text);
+    font-family: 'Syne', sans-serif; font-size: 30px;
+    font-weight: 800; letter-spacing: -1.5px; line-height: 1; color: var(--text);
   }
-  .hdr-brand h1 em {
-    font-style: normal;
-    color: var(--cyan);
-  }
+  .hdr-brand h1 em { font-style: normal; color: var(--cyan); }
   .hdr-brand .sub {
-    font-family: var(--mono);
-    font-size: 9.5px;
-    color: var(--text3);
-    letter-spacing: .14em;
-    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; color: var(--text3); letter-spacing: .14em; text-transform: uppercase;
   }
+  .hdr-right { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
 
-  .hdr-right {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  /* ── theme button ── */
   .theme-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    border-radius: var(--r-sm);
-    padding: 8px 14px;
-    cursor: pointer;
-    font: 500 12px/1 var(--sans);
-    transition: border-color .15s, color .15s;
-    white-space: nowrap;
-    align-self: center;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text2); border-radius: var(--r-sm); padding: 8px 14px;
+    cursor: pointer; font: 500 12px/1 'DM Sans',sans-serif;
+    transition: border-color .15s, color .15s; white-space: nowrap; align-self: center;
   }
   .theme-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 
-  /* ── live ticker ── */
+  /* ─── TICKER ─── */
+  .ticker-wrap {
+    display: flex; gap: 8px;
+  }
   .ticker {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 10px 14px;
-    min-width: 210px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 10px 14px; min-width: 170px;
   }
   .ticker-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font: 600 10px/1 var(--sans);
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 6px;
+    display: flex; align-items: center; justify-content: space-between;
+    font: 600 10px/1 'DM Sans',sans-serif; color: var(--text2);
+    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
   }
-  .dot {
-    display: inline-block;
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    margin-right: 6px;
-    vertical-align: middle;
-    flex-shrink: 0;
-  }
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: .25; transform: scale(.75); }
-  }
+  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; flex-shrink: 0; }
+  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(.75)} }
   .dot-ok   { background: var(--green); box-shadow: 0 0 6px var(--green); }
   .dot-err  { background: var(--red); }
   .dot-load { background: var(--amber); animation: pulse-dot 1.2s ease-in-out infinite; }
-
   .refresh-btn {
-    background: none; border: none;
-    color: var(--text3);
-    cursor: pointer;
-    font-size: 15px; padding: 0;
-    transition: color .15s, transform .35s cubic-bezier(.34,1.56,.64,1);
-    line-height: 1;
+    background: none; border: none; color: var(--text3);
+    cursor: pointer; font-size: 15px; padding: 0;
+    transition: color .15s, transform .35s cubic-bezier(.34,1.56,.64,1); line-height: 1;
   }
   .refresh-btn:hover { color: var(--cyan); transform: rotate(180deg); }
-
-  .ticker-price {
-    font: 700 22px/1 var(--mono);
-    color: var(--text);
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .ticker-time   { font: 400 10px/1 var(--mono); color: var(--text3); }
+  .ticker-price { font: 700 20px/1 'JetBrains Mono',monospace; color: var(--text); display: flex; align-items: baseline; gap: 8px; }
+  .ticker-time   { font: 400 10px/1 'JetBrains Mono',monospace; color: var(--text3); }
   .ticker-source { font-size: 10px; color: var(--text3); margin-top: 3px; }
-  .ticker-note   { font: 400 9.5px/1 var(--mono); color: var(--text3); margin-top: 5px; opacity: .7; }
-  .ticker-load   { font: 400 11px/1 var(--mono); color: var(--text3); padding: 4px 0; }
+  .ticker-note   { font: 400 9.5px/1 'JetBrains Mono',monospace; color: var(--text3); margin-top: 5px; opacity: .7; }
+  .ticker-load   { font: 400 11px/1 'JetBrains Mono',monospace; color: var(--text3); padding: 4px 0; }
 
-  /* ═══════════════════════════════════════════
-     CONTROLS
-  ═══════════════════════════════════════════ */
+  /* ─── CONTROLS ─── */
   .controls {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 11px 16px;
-    margin-bottom: 12px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 11px 16px; margin-bottom: 12px;
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
   }
   .ctrl-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .ctrl-label {
-    font: 600 10px/1 var(--sans);
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    white-space: nowrap;
+    font: 600 10px/1 'DM Sans',sans-serif; color: var(--text2);
+    text-transform: uppercase; letter-spacing: .08em; white-space: nowrap;
   }
-  .ctrl-sep {
-    width: 1px; height: 22px;
-    background: var(--border);
-    flex-shrink: 0;
-  }
+  .ctrl-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
 
-  /* ── buttons ── */
   .btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    border-radius: var(--r-sm);
-    padding: 5px 11px;
-    cursor: pointer;
-    font: 500 12px/1 var(--sans);
-    transition: border-color .13s, color .13s, background .13s;
-    white-space: nowrap;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text2); border-radius: var(--r-sm); padding: 5px 11px;
+    cursor: pointer; font: 500 12px/1 'DM Sans',sans-serif;
+    transition: border-color .13s, color .13s, background .13s; white-space: nowrap;
   }
   .btn:hover { border-color: var(--text2); color: var(--text); }
-  .btn.on {
-    background: var(--cyan-dim);
-    border-color: rgba(34,211,238,.35);
-    color: var(--cyan);
-  }
+  .btn.on { background: var(--cyan-dim); border-color: rgba(34,211,238,.35); color: var(--cyan); }
 
-  /* ═══════════════════════════════════════════
-     TABLE
-  ═══════════════════════════════════════════ */
+  /* round-to input in controls */
+  .round-input {
+    width: 52px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 4px 7px; font: 400 12px/1 'JetBrains Mono',monospace;
+    color: var(--text); transition: border-color .15s; -moz-appearance: textfield;
+  }
+  .round-input::-webkit-outer-spin-button,.round-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .round-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(34,211,238,.08); }
+  .round-input:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* fork-type select in controls */
+  .fork-select {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 4px 8px;
+    font: 500 12px/1 'JetBrains Mono',monospace; color: var(--text);
+    cursor: pointer; transition: border-color .13s;
+  }
+  .fork-select:focus { outline: none; border-color: var(--cyan); }
+
+  /* ─── TABLE ─── */
   .tbl-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    overflow: auto;
-    margin-bottom: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); overflow: auto; margin-bottom: 12px;
   }
-
   table { border-collapse: collapse; width: 100%; }
-
   th {
-    padding: 9px 10px;
-    background: var(--surface2);
-    font: 600 10px/1 var(--sans);
-    color: var(--text2);
-    text-transform: uppercase;
-    letter-spacing: .07em;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
+    padding: 9px 10px; background: var(--surface2);
+    font: 600 10px/1 'DM Sans',sans-serif; color: var(--text2);
+    text-transform: uppercase; letter-spacing: .07em;
+    border-bottom: 1px solid var(--border); white-space: nowrap;
   }
-  th.poly-th {
-    background: var(--poly-bg);
-    color: var(--poly);
-    border-bottom-color: var(--poly-border);
-  }
-
+  th.poly-th { background: var(--poly-bg); color: var(--poly); border-bottom-color: var(--poly-border); }
+  th.lay-th  { background: var(--lay-bg);  color: var(--lay);  border-bottom-color: var(--lay-border);  }
   td {
     border-bottom: 1px solid var(--border-soft);
-    padding: 7px 10px;
-    vertical-align: middle;
+    padding: 7px 10px; vertical-align: middle;
   }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr { transition: background .1s; }
   tbody tr:hover td { background: var(--row-hover); }
   td.poly-td { background: var(--poly-bg); }
   tbody tr:hover td.poly-td { background: rgba(167,139,250,.13); }
+  tr.is-lay td { background: rgba(244,114,182,.025); }
+  tbody tr.is-lay:hover td { background: rgba(244,114,182,.06); }
+  tr.is-lay td.poly-td { background: rgba(167,139,250,.06); }
 
-  .num-col { text-align: right; font-family: var(--mono); }
+  .num-col { text-align: right; font-family: 'JetBrains Mono',monospace; }
   .ctr-col { text-align: center; }
 
-  /* ── inputs ── */
   input[type=number] {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    padding: 5px 8px;
-    font: 400 12.5px/1 var(--mono);
-    color: var(--text);
-    transition: border-color .15s, box-shadow .15s;
-    -moz-appearance: textfield;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 5px 8px;
+    font: 400 12.5px/1 'JetBrains Mono',monospace; color: var(--text);
+    transition: border-color .15s, box-shadow .15s; -moz-appearance: textfield;
   }
   input[type=number]::-webkit-outer-spin-button,
   input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  input[type=number]:focus {
-    outline: none;
-    border-color: var(--cyan);
-    box-shadow: 0 0 0 3px rgba(34,211,238,.08);
-  }
-  input[type=number][readonly] {
-    background: var(--inp-ro);
-    cursor: default;
-    font-weight: 700;
-  }
+  input[type=number]:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.08); }
+  input[type=number][readonly] { background: var(--inp-ro); cursor: default; font-weight: 700; }
 
   select {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--r-sm);
-    padding: 4px 7px;
-    font: 400 11.5px/1 var(--sans);
-    color: var(--text);
-    cursor: pointer;
-    transition: border-color .13s;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 4px 7px;
+    font: 400 11.5px/1 'DM Sans',sans-serif; color: var(--text);
+    cursor: pointer; transition: border-color .13s;
   }
   select:focus { outline: none; border-color: var(--poly); }
   select:disabled { opacity: .3; cursor: not-allowed; }
 
-  input[type=checkbox] {
-    width: 14px; height: 14px;
-    cursor: pointer;
-    accent-color: var(--poly);
-  }
+  input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--poly); }
 
   /* currency pill */
-  .cur-btn, .fix-btn {
-    border-radius: var(--r-xs);
-    padding: 3px 9px;
-    font-size: 11px;
-    cursor: pointer;
-    transition: all .13s;
-  }
   .cur-btn {
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    color: var(--text2);
-    font-family: var(--mono);
-    font-weight: 600;
-    border-radius: 20px;
+    border-radius: 20px; padding: 3px 9px; font-size: 11px;
+    cursor: pointer; transition: all .13s;
+    background: var(--surface3); border: 1px solid var(--border);
+    color: var(--text2); font-family: 'JetBrains Mono',monospace; font-weight: 600;
   }
   .cur-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .cur-btn.eur { border-color: rgba(251,191,36,.3); color: var(--eur); background: rgba(251,191,36,.06); }
+
+  /* back/lay toggle */
+  .bl-btn {
+    border-radius: var(--r-sm); padding: 3px 9px;
+    font: 700 13px/1 'JetBrains Mono',monospace;
+    cursor: pointer; transition: all .13s; border: 1px solid;
+    min-width: 32px; text-align: center;
+  }
+  .bl-btn.back { background: var(--green-bg); border-color: var(--green-border); color: var(--green-bright); }
+  .bl-btn.back:hover { background: rgba(16,185,129,.15); border-color: var(--green); }
+  .bl-btn.lay  { background: var(--lay-bg);   border-color: var(--lay-border);   color: var(--lay); }
+  .bl-btn.lay:hover  { background: rgba(244,114,182,.15); border-color: var(--lay); }
 
   /* fix button */
   .fix-btn {
-    background: none;
-    border: 1px solid var(--border);
-    color: var(--text3);
-    font-size: 13px;
+    background: none; border: 1px solid var(--border);
+    color: var(--text3); font-size: 13px;
+    border-radius: var(--r-xs); padding: 3px 8px; cursor: pointer; transition: all .13s;
   }
   .fix-btn:hover { border-color: var(--fix); }
-  .fix-btn.fix-on {
-    background: var(--fix-bg);
-    border-color: var(--fix-border);
-    color: var(--fix);
-  }
+  .fix-btn.fix-on { background: var(--fix-bg); border-color: var(--fix-border); color: var(--fix); }
+  .stake-fixed { background: var(--fix-bg) !important; border-color: var(--fix-border) !important; color: var(--fix) !important; font-weight: 700; }
 
-  /* stake fixed */
-  .stake-fixed {
-    background: var(--fix-bg) !important;
-    border-color: var(--fix-border) !important;
-    color: var(--fix) !important;
-    font-weight: 700;
+  /* liability badge */
+  .liab-badge {
+    font: 400 10px/1 'JetBrains Mono',monospace; color: var(--lay); margin-top: 3px;
+    background: var(--lay-bg); border: 1px solid var(--lay-border);
+    border-radius: var(--r-xs); padding: 2px 7px; display: inline-block;
   }
 
   /* tfoot */
   tfoot td {
-    background: var(--tfoot-bg);
-    border-top: 1px solid var(--border);
-    border-bottom: none;
-    padding: 9px 10px;
+    background: var(--tfoot-bg); border-top: 1px solid var(--border);
+    border-bottom: none; padding: 9px 10px;
   }
 
-  /* profit/loss text */
-  .pos  { color: var(--green-bright); font: 700 13px/1 var(--mono); }
-  .neg  { color: var(--red);          font: 700 13px/1 var(--mono); }
-  .dim  { font: 400 10px/1 var(--mono); color: var(--text3); }
+  .pos  { color: var(--green-bright); font: 700 13px/1 'JetBrains Mono',monospace; }
+  .neg  { color: var(--red);          font: 700 13px/1 'JetBrains Mono',monospace; }
+  .dim  { font: 400 10px/1 'JetBrains Mono',monospace; color: var(--text3); }
 
-  /* fee badge */
   .fee-badge {
-    display: inline-block;
-    background: var(--poly-bg);
-    border: 1px solid var(--poly-border);
-    color: var(--poly);
-    font: 600 10px/1 var(--mono);
-    padding: 2px 8px;
-    border-radius: 20px;
-    letter-spacing: .02em;
+    display: inline-block; background: var(--poly-bg); border: 1px solid var(--poly-border);
+    color: var(--poly); font: 600 10px/1 'JetBrains Mono',monospace;
+    padding: 2px 8px; border-radius: 20px; letter-spacing: .02em;
   }
 
-  /* ═══════════════════════════════════════════
-     SUMMARY CARDS
-  ═══════════════════════════════════════════ */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-
+  /* ─── SUMMARY CARDS ─── */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
   .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 13px 15px;
-    transition: border-color .2s, box-shadow .2s;
-    position: relative;
-    overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 13px 15px;
+    transition: border-color .2s, box-shadow .2s; position: relative; overflow: hidden;
   }
-  .card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,.02) 0%, transparent 60%);
-    pointer-events: none;
-  }
-  .card-label {
-    font: 600 9.5px/1 var(--sans);
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    margin-bottom: 6px;
-  }
-  .card-value {
-    font: 700 17px/1.2 var(--mono);
-    color: var(--text);
-  }
-
-  /* verdict card states */
-  .card.green {
-    border-color: var(--green-border);
-    background: var(--green-bg);
-    box-shadow: 0 0 20px var(--green-glow);
-  }
+  .card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.02) 0%,transparent 60%); pointer-events:none; }
+  .card-label { font: 600 9.5px/1 'DM Sans',sans-serif; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+  .card-value { font: 700 17px/1.2 'JetBrains Mono',monospace; color: var(--text); }
+  .card.green { border-color: var(--green-border); background: var(--green-bg); box-shadow: 0 0 20px var(--green-glow); }
   .card.green .card-value { color: var(--green-bright); }
   .card.green .card-label { color: rgba(52,211,153,.4); }
-
-  .card.red {
-    border-color: var(--red-border);
-    background: var(--red-bg);
-    box-shadow: 0 0 20px var(--red-glow);
-  }
+  .card.red { border-color: var(--red-border); background: var(--red-bg); box-shadow: 0 0 20px var(--red-glow); }
   .card.red .card-value { color: var(--red); }
   .card.red .card-label { color: rgba(244,63,94,.4); }
 
-  /* ═══════════════════════════════════════════
-     ACTIONS
-  ═══════════════════════════════════════════ */
-  .actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
+  /* ─── ACTIONS ─── */
+  .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
   .actions .btn { padding: 8px 18px; font-size: 12.5px; }
-  .actions .btn.primary {
-    background: var(--cyan-dim);
-    border-color: rgba(34,211,238,.3);
-    color: var(--cyan);
-  }
-  .actions .btn.primary:hover {
-    background: rgba(34,211,238,.14);
-    border-color: var(--cyan);
-  }
+  .actions .btn.primary { background: var(--cyan-dim); border-color: rgba(34,211,238,.3); color: var(--cyan); }
+  .actions .btn.primary:hover { background: rgba(34,211,238,.14); border-color: var(--cyan); }
 
-  /* ═══════════════════════════════════════════
-     LEGEND
-  ═══════════════════════════════════════════ */
+  /* ─── LEGEND ─── */
   .legend {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--r);
-    padding: 12px 16px;
-    font-size: 11px;
-    color: var(--text3);
-    line-height: 1.8;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 12px 16px;
+    font-size: 11px; color: var(--text3); line-height: 1.8;
   }
   .legend strong { color: var(--poly); font-weight: 600; }
   .legend code {
-    font-family: var(--mono);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: var(--r-xs);
-    padding: 1px 7px;
-    font-size: 10.5px;
-    color: var(--cyan);
+    font-family: 'JetBrains Mono',monospace; background: var(--surface2);
+    border: 1px solid var(--border); border-radius: var(--r-xs);
+    padding: 1px 7px; font-size: 10.5px; color: var(--cyan);
   }
+  .warn-bar { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); border-radius: var(--r-sm); padding: 5px 12px; font-size: 12px; }
 
-  /* ═══════════════════════════════════════════
-     WARN BAR
-  ═══════════════════════════════════════════ */
-  .warn-bar {
-    background: var(--amber-bg);
-    border: 1px solid var(--amber-border);
-    color: var(--amber);
-    border-radius: var(--r-sm);
-    padding: 5px 12px;
-    font-size: 12px;
-  }
-
-  /* ═══════════════════════════════════════════
-     RESPONSIVE
-  ═══════════════════════════════════════════ */
+  /* ─── RESPONSIVE ─── */
   @media (max-width: 640px) {
     .hdr-brand h1 { font-size: 24px; }
     .hdr { flex-direction: column; }
-    .ticker { min-width: unset; width: 100%; }
+    .ticker-wrap { width: 100%; }
+    .ticker { min-width: unset; flex: 1; }
     .cards { grid-template-columns: repeat(2, 1fr); }
     .controls { gap: 10px; }
   }
@@ -601,17 +387,25 @@
   <div class="hdr">
     <div class="hdr-brand">
       <h1>Sure<em>bet</em></h1>
-      <div class="sub">v2.0 · Arbitrage + Polymarket</div>
+      <div class="sub">v3.0 · Arbitrage + Polymarket · Back &amp; Lay</div>
     </div>
     <div class="hdr-right">
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
-      <div class="ticker">
-        <div class="ticker-top">
-          <span><span class="dot dot-load" id="status-dot"></span>USDC / BRL</span>
-          <button class="refresh-btn" onclick="fetchRate()" title="Atualizar">↺</button>
+      <div class="ticker-wrap">
+        <div class="ticker">
+          <div class="ticker-top">
+            <span><span class="dot dot-load" id="dot-brl"></span>USD/BRL</span>
+            <button class="refresh-btn" onclick="fetchRates()" title="Atualizar">↺</button>
+          </div>
+          <div id="ticker-brl"><div class="ticker-load">Buscando…</div></div>
+          <div class="ticker-note">↻ 5s</div>
         </div>
-        <div id="ticker-body"><div class="ticker-load">Buscando cotação…</div></div>
-        <div class="ticker-note">↻ atualiza a cada 5s</div>
+        <div class="ticker">
+          <div class="ticker-top">
+            <span><span class="dot dot-load" id="dot-eur"></span>USD/EUR</span>
+          </div>
+          <div id="ticker-eur"><div class="ticker-load">Buscando…</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -623,18 +417,20 @@
       <div id="outcome-btns" style="display:flex;gap:5px"></div>
     </div>
     <div class="ctrl-sep"></div>
-    <button class="btn" id="show-comm-btn" onclick="toggleShowComm()">Hide commissions</button>
-    <div class="ctrl-sep"></div>
     <div class="ctrl-group">
-      <span class="ctrl-label">Round stakes</span>
-      <button class="btn" id="round-off-btn" onclick="setRound(0)">Off</button>
-      <button class="btn" id="round-1-btn"   onclick="setRound(1)">$1</button>
-      <button class="btn" id="round-5-btn"   onclick="setRound(5)">$5</button>
-      <button class="btn" id="round-10-btn"  onclick="setRound(10)">$10</button>
+      <span class="ctrl-label">Type</span>
+      <select class="fork-select" id="fork-type" onchange="onForkChange()"></select>
     </div>
     <div class="ctrl-sep"></div>
-    <button class="btn" id="round-fx-btn" onclick="toggleRoundFx()">FX rounding: OFF</button>
-    <div id="brl-warn" style="display:none" class="warn-bar">⚠ Linhas em BRL precisam da cotação ao vivo</div>
+    <button class="btn on" id="show-comm-btn" onclick="toggleShowComm()">Hide commissions</button>
+    <div class="ctrl-sep"></div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Round to</span>
+      <button class="btn on" id="round-off-btn" onclick="setRound(0)">Off</button>
+      <input type="number" class="round-input" id="round-custom" min="0.01" step="0.01" placeholder="e.g. 1" disabled oninput="onRoundInput(this.value)" title="Round up stakes to nearest">
+      <button class="btn" id="round-fx-btn" onclick="toggleRoundFx()" title="Apply FX rounding in BRL then convert back">FX round: OFF</button>
+    </div>
+    <div id="brl-warn" style="display:none" class="warn-bar">⚠ BRL rows need live rate</div>
   </div>
 
   <!-- ── TABLE ── -->
@@ -651,16 +447,19 @@
 
   <!-- ── ACTIONS ── -->
   <div class="actions">
-    <button class="btn primary" onclick="copyStakes()" id="copy-btn">📋 Copiar stakes</button>
-    <button class="btn" onclick="loadExample()">Exemplo sports 3-way</button>
-    <button class="btn" onclick="resetAll()">Resetar tudo</button>
+    <button class="btn primary" onclick="copyStakes()" id="copy-btn">📋 Copy stakes</button>
+    <button class="btn" onclick="loadExample()">Example 3-way sports</button>
+    <button class="btn" onclick="loadLayExample()">Example back/lay</button>
+    <button class="btn" onclick="resetAll()">Reset all</button>
   </div>
 
   <!-- ── LEGEND ── -->
   <div class="legend">
-    <strong>Polymarket taker fee (a partir de 30/03/2026):</strong><br>
-    <code>eff_rate = feeRate × (p × (1−p))^exponent</code> onde p = 1/odds.<br>
-    Rounding usa Math.ceil (para cima). FX rounding converte → arredonda em BRL → converte de volta.
+    <strong>Back bet eff. odds:</strong> <code>1 + (odds−1) × (1 − commission%)</code> &nbsp;·&nbsp;
+    <strong>Lay bet eff. odds:</strong> <code>odds − commission%</code><br>
+    <strong>Polymarket taker fee (desde 30/03/2026):</strong> <code>eff_rate = feeRate × (p × (1−p))^exponent</code> onde p = 1/odds.<br>
+    <strong>Lay stake</strong> shown = backer's stake on exchange; <strong>Liability</strong> = backer_stake × (lay_odds − 1).
+    Round uses Math.ceil. FX round: converts → rounds in BRL → converts back.
   </div>
 
 </div>
@@ -683,47 +482,92 @@ const POLY_CATS = {
 };
 const CAT_KEYS = Object.keys(POLY_CATS);
 
+// Fork/formula types — label, minOutcomes
+const FORK_TYPES_2 = [
+  { id:"1-2",   label:"1 — 2",        hint:"Home vs Away" },
+  { id:"1-X2",  label:"1 — X2",       hint:"Back Home / Lay X2" },
+  { id:"1X-2",  label:"1X — 2",       hint:"Lay Home / Back Away" },
+  { id:"AH",    label:"AH1 — AH2",    hint:"Asian Handicap" },
+  { id:"OU",    label:"Over — Under",  hint:"Goals market" },
+];
+const FORK_TYPES_3 = [
+  { id:"1-X-2",    label:"1 — X — 2",       hint:"3-way standard" },
+  { id:"3corr",    label:"3 corners",        hint:"Corners market" },
+  { id:"DNB+D",    label:"DNB + Draw",       hint:"Draw No Bet + Draw" },
+];
+const FORK_TYPES_N = [
+  { id:"multi",    label:"Multi-way",        hint:"4+ outcomes" },
+];
+
+const CURR_SYMS = { USD:"$", EUR:"€", BRL:"R$" };
+
+// ====================== STATE ======================
 let numOut     = 2;
 let showComm   = true;
 let roundValue = 0;
 let roundUseFx = false;
 let nextId     = 3;
 let rows       = [makeRow(1), makeRow(2)];
-let usdcBrl    = null;
+let rates      = { USD: 1, EUR: null, BRL: null };
 let lastUpdated = null;
 let result      = null;
-let darkMode    = true; // dark by default
+let darkMode    = true;
+let forkType    = "1-2";
 
 function makeRow(id) {
-  return { id, odds: "", comm: "0", usePoly: false, cat: "Sports", currency: "USD", isFixed: false, fixedStake: "" };
+  return {
+    id, odds:"", comm:"0",
+    betType:"back",     // "back" | "lay"
+    usePoly:false, cat:"Sports",
+    currency:"USD", isFixed:false, fixedStake:"",
+    manualStake: null   // user-typed override when another row is the fixed anchor
+  };
 }
 
 // ====================== MATH ======================
-function calcEffOdds(raw, commPct, usePoly, catKey) {
+/**
+ * Effective odds taking commission and bet type into account.
+ *
+ * Back bet: eff = 1 + (raw−1)×(1 − c%)  [commission on profit only]
+ * Lay  bet: eff = raw − c%               [lay formula]
+ * Then apply Polymarket taker fee on top (back only).
+ */
+function calcEffOdds(raw, commPct, betType, usePoly, catKey) {
   if (!raw || raw <= 1) return null;
-  let ac = commPct > 0 ? raw * (1 - commPct / 100) + commPct / 100 : raw;
-  if (!usePoly) return ac;
+  const c = (parseFloat(commPct) || 0) / 100;
+  let eff;
+  if (betType === "lay") {
+    eff = raw - c;                          // lay formula
+  } else {
+    eff = 1 + (raw - 1) * (1 - c);         // back formula
+  }
+  if (eff <= 1) return null;
+  if (!usePoly || betType === "lay") return eff;
   const { feeRate, exponent } = POLY_CATS[catKey];
-  if (!feeRate) return ac;
-  const p = 1 / ac;
-  return 1 / (p * (1 + feeRate * Math.pow(p * (1 - p), exponent)));
+  if (!feeRate) return eff;
+  const p = 1 / eff;
+  const adjEff = 1 / (p * (1 + feeRate * Math.pow(p * (1 - p), exponent)));
+  return adjEff > 1 ? adjEff : null;
 }
 
 function takerFeePct(raw, commPct, catKey) {
   if (raw <= 1) return 0;
-  let ac = commPct > 0 ? raw * (1 - commPct / 100) + commPct / 100 : raw;
+  const c = (parseFloat(commPct) || 0) / 100;
+  const eff = 1 + (raw - 1) * (1 - c);
+  if (eff <= 1) return 0;
   const { feeRate, exponent } = POLY_CATS[catKey];
   if (!feeRate) return 0;
-  const p = 1 / ac;
+  const p = 1 / eff;
   return feeRate * Math.pow(p * (1 - p), exponent) * 100;
 }
 
-function f2(n) { return (typeof n === "number" && isFinite(n)) ? n.toFixed(2) : "—"; }
-function currSym(c) { return c === "USD" ? "$" : "R$"; }
+function f2(n) { return (typeof n==="number" && isFinite(n)) ? n.toFixed(2) : "—"; }
 
 function toDisplay(usdAmt, currency) {
   if (currency === "USD") return usdAmt;
-  return usdcBrl ? usdAmt * usdcBrl : null;
+  if (currency === "EUR") return rates.EUR ? usdAmt * rates.EUR : null;
+  if (currency === "BRL") return rates.BRL ? usdAmt * rates.BRL : null;
+  return null;
 }
 
 // ====================== THEME ======================
@@ -735,34 +579,97 @@ function toggleTheme() {
 }
 
 // ====================== RATE FETCHER ======================
-async function fetchRate() {
-  document.getElementById("status-dot").className = "dot dot-load";
+async function fetchRates() {
+  ["dot-brl","dot-eur"].forEach(id => {
+    document.getElementById(id).className = "dot dot-load";
+  });
+
   const attempts = [
-    () => fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL", {cache:"no-store"}).then(r=>r.json()).then(d=>({price:parseFloat(d.price), src:"Binance USDCBRL"})),
-    () => fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL", {cache:"no-store"}).then(r=>r.json()).then(d=>({price:parseFloat(d.price), src:"Binance USDTBRL"})),
-    () => fetch("https://open.er-api.com/v6/latest/USD").then(r=>r.json()).then(d=>({price:d.rates.BRL, src:"ExchangeRate-API"})),
-    () => fetch("https://api.frankfurter.app/latest?base=USD&symbols=BRL").then(r=>r.json()).then(d=>({price:d.rates.BRL, src:"Frankfurter/ECB"})),
+    async () => {
+      const [brlRes, eurRes] = await Promise.all([
+        fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL",{cache:"no-store"}).then(r=>r.json()),
+        fetch("https://api.binance.com/api/v3/ticker/price?symbol=EURUSDT",{cache:"no-store"}).then(r=>r.json()),
+      ]);
+      const brl = parseFloat(brlRes.price);
+      const eurUsd = parseFloat(eurRes.price);    // EUR per USD
+      return { brl, eur: 1/eurUsd, src:"Binance" };
+    },
+    async () => {
+      const d = await fetch("https://open.er-api.com/v6/latest/USD").then(r=>r.json());
+      return { brl: d.rates.BRL, eur: d.rates.EUR, src:"ExchangeRate-API" };
+    },
+    async () => {
+      const d = await fetch("https://api.frankfurter.app/latest?base=USD&symbols=BRL,EUR").then(r=>r.json());
+      return { brl: d.rates.BRL, eur: d.rates.EUR, src:"Frankfurter/ECB" };
+    },
   ];
+
   for (const fn of attempts) {
     try {
-      const {price, src} = await fn();
-      if (price > 0) { gotRate(price, src); return; }
+      const { brl, eur, src } = await fn();
+      if (brl > 0 && eur > 0) {
+        gotRates(brl, eur, src); return;
+      }
     } catch (_) {}
   }
-  document.getElementById("ticker-body").innerHTML = `<div style="color:var(--red);font-family:var(--mono);font-size:11px">Falha ao buscar cotação</div>`;
-  document.getElementById("status-dot").className = "dot dot-err";
+
+  // Fallback: try existing USDT/BRL + hardcode EUR
+  try {
+    const d = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL",{cache:"no-store"}).then(r=>r.json());
+    const brl = parseFloat(d.price);
+    if (brl > 0) { gotRates(brl, rates.EUR || 0.92, "Binance USDT"); return; }
+  } catch (_) {}
+
+  document.getElementById("ticker-brl").innerHTML = `<div style="color:var(--red);font-size:11px;font-family:'JetBrains Mono',monospace">Falha</div>`;
+  document.getElementById("ticker-eur").innerHTML = `<div style="color:var(--red);font-size:11px;font-family:'JetBrains Mono',monospace">Falha</div>`;
+  ["dot-brl","dot-eur"].forEach(id => { document.getElementById(id).className = "dot dot-err"; });
 }
 
-function gotRate(price, source) {
-  usdcBrl = price;
+function gotRates(brl, eur, source) {
+  rates.BRL = brl;
+  rates.EUR = eur;
   lastUpdated = new Date();
-  document.getElementById("status-dot").className = "dot dot-ok";
-  document.getElementById("ticker-body").innerHTML = `
-    <div class="ticker-price">R$${price.toFixed(4)}<span class="ticker-time">${lastUpdated.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})}</span></div>
-    <div class="ticker-source">${source}</div>
-  `;
-  calc();
-  updateDisplay();
+  const t = lastUpdated.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+
+  document.getElementById("dot-brl").className = "dot dot-ok";
+  document.getElementById("ticker-brl").innerHTML = `
+    <div class="ticker-price">R$${brl.toFixed(4)}<span class="ticker-time">${t}</span></div>
+    <div class="ticker-source">${source}</div>`;
+
+  document.getElementById("dot-eur").className = "dot dot-ok";
+  document.getElementById("ticker-eur").innerHTML = `
+    <div class="ticker-price">€${eur.toFixed(4)}<span class="ticker-time">${t}</span></div>
+    <div class="ticker-source">${source}</div>`;
+
+  calc(); updateDisplay();
+}
+
+// ====================== FORK TYPE ======================
+function buildForkSelect() {
+  const sel = document.getElementById("fork-type");
+  const types = numOut === 2 ? FORK_TYPES_2 : numOut === 3 ? FORK_TYPES_3 : FORK_TYPES_N;
+  sel.innerHTML = types.map(t =>
+    `<option value="${t.id}" title="${t.hint}"${forkType===t.id?" selected":""}>${t.label}</option>`
+  ).join("");
+  // default fork
+  if (!types.find(t=>t.id===forkType)) {
+    forkType = types[0].id;
+    sel.value = forkType;
+  }
+}
+
+function onForkChange() {
+  forkType = document.getElementById("fork-type").value;
+  // Auto-set back/lay for 1-X2 and 1X-2
+  if (forkType === "1-X2" && rows.length >= 2) {
+    rows[0].betType = "back"; rows[1].betType = "lay";
+  } else if (forkType === "1X-2" && rows.length >= 2) {
+    rows[0].betType = "lay"; rows[1].betType = "back";
+  } else {
+    // All back for other types
+    rows.forEach(r => { if(forkType!=="1-X2"&&forkType!=="1X-2") r.betType="back"; });
+  }
+  calc(); buildTable();
 }
 
 // ====================== OUTCOMES ======================
@@ -778,10 +685,12 @@ function gotRate(price, source) {
       rows = rows.slice(0, numOut);
       wrap.querySelectorAll(".btn").forEach(x => x.classList.remove("on"));
       b.classList.add("on");
+      buildForkSelect();
       calc(); buildTable();
     };
     wrap.appendChild(b);
   });
+  buildForkSelect();
 })();
 
 function toggleShowComm() {
@@ -794,68 +703,114 @@ function toggleShowComm() {
 
 function setRound(val) {
   roundValue = val;
-  ["round-off-btn","round-1-btn","round-5-btn","round-10-btn"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.remove("on");
-  });
-  const btnId = val === 0 ? "round-off-btn" : `round-${val}-btn`;
-  const el = document.getElementById(btnId);
-  if (el) el.classList.add("on");
+  const inp = document.getElementById("round-custom");
+  if (val === 0) {
+    inp.value = ""; inp.disabled = true;
+    document.getElementById("round-off-btn").classList.add("on");
+  } else {
+    inp.disabled = false;
+    inp.value = val;
+    document.getElementById("round-off-btn").classList.remove("on");
+  }
+  calc(); updateDisplay();
+}
+
+function onRoundInput(val) {
+  const v = parseFloat(val);
+  roundValue = (v > 0) ? v : 0;
+  document.getElementById("round-off-btn").classList.toggle("on", roundValue === 0);
   calc(); updateDisplay();
 }
 
 function toggleRoundFx() {
   roundUseFx = !roundUseFx;
   const btn = document.getElementById("round-fx-btn");
-  btn.textContent = roundUseFx ? "FX rounding: ON" : "FX rounding: OFF";
+  btn.textContent = roundUseFx ? "FX round: ON" : "FX round: OFF";
   btn.classList.toggle("on", roundUseFx);
   calc(); updateDisplay();
 }
 
 // ====================== CALC ======================
 function calc() {
-  const effArr = rows.map(r => calcEffOdds(parseFloat(r.odds), parseFloat(r.comm)||0, r.usePoly, r.cat));
+  const effArr = rows.map(r =>
+    calcEffOdds(parseFloat(r.odds), parseFloat(r.comm)||0, r.betType, r.usePoly, r.cat)
+  );
   if (!effArr.every(o => o !== null && o > 1)) { result = null; return; }
 
-  const invSum = effArr.reduce((s, o) => s + 1/o, 0);
-  const margin = invSum;
+  const invSum  = effArr.reduce((s,o) => s + 1/o, 0);
+  const margin  = invSum;
   const isSurebet = margin < 1;
 
   const fixIdx = rows.findIndex(r => r.isFixed);
-  let target = fixIdx >= 0
-    ? (parseFloat(rows[fixIdx].fixedStake)||0) * effArr[fixIdx] / (rows[fixIdx].currency==="BRL" && usdcBrl ? usdcBrl : 1)
-    : 100 / invSum;
+  let target;
+  if (fixIdx >= 0) {
+    const fRow = rows[fixIdx];
+    const raw  = parseFloat(fRow.fixedStake) || 0;
+    // Convert fixed stake to USD
+    let usdFixed;
+    if (fRow.currency === "USD") usdFixed = raw;
+    else if (fRow.currency === "EUR") usdFixed = rates.EUR ? raw / rates.EUR : raw;
+    else if (fRow.currency === "BRL") usdFixed = rates.BRL ? raw / rates.BRL : raw;
+    else usdFixed = raw;
+    target = usdFixed * effArr[fixIdx];
+  } else {
+    target = 100 / invSum;
+  }
 
   let stakesUSD = effArr.map(o => target / o);
+
+  // Apply manual stake overrides (rows where user typed a value while another row is the anchor)
+  rows.forEach((r, i) => {
+    if (r.manualStake !== null && !r.isFixed) {
+      const raw = r.manualStake === "" ? null : parseFloat(r.manualStake);
+      if (raw !== null && !isNaN(raw)) {
+        let usdManual;
+        if (r.currency === "USD") usdManual = raw;
+        else if (r.currency === "EUR") usdManual = rates.EUR ? raw / rates.EUR : raw;
+        else if (r.currency === "BRL") usdManual = rates.BRL ? raw / rates.BRL : raw;
+        else usdManual = raw;
+        stakesUSD[i] = usdManual;
+      }
+    }
+  });
 
   if (roundValue > 0) {
     stakesUSD = stakesUSD.map((s, i) => {
       const row = rows[i];
-      if (roundUseFx && row.currency === "BRL" && usdcBrl) {
-        const brl = s * usdcBrl;
+      if (roundUseFx && row.currency === "BRL" && rates.BRL) {
+        const brl     = s * rates.BRL;
         const rounded = Math.ceil(brl / roundValue) * roundValue;
-        return rounded / usdcBrl;
+        return rounded / rates.BRL;
+      }
+      if (roundUseFx && row.currency === "EUR" && rates.EUR) {
+        const eur     = s * rates.EUR;
+        const rounded = Math.ceil(eur / roundValue) * roundValue;
+        return rounded / rates.EUR;
       }
       return Math.ceil(s / roundValue) * roundValue;
     });
   }
 
-  const totalUSD    = stakesUSD.reduce((a,b)=>a+b,0);
-  const returnsUSD  = stakesUSD.map((s,i)=>s*effArr[i]);
-  const profitsUSD  = returnsUSD.map(r=>r-totalUSD);
-  const minProfit   = Math.min(...profitsUSD);
-  const roi         = totalUSD ? (minProfit / totalUSD) * 100 : 0;
+  const totalUSD   = stakesUSD.reduce((a,b)=>a+b,0);
+  const returnsUSD = stakesUSD.map((s,i)=>s*effArr[i]);
+  const profitsUSD = returnsUSD.map(r=>r-totalUSD);
+  const minProfit  = Math.min(...profitsUSD);
+  const roi        = totalUSD ? (minProfit / totalUSD) * 100 : 0;
 
   result = { margin, isSurebet, effArr, stakesUSD, totalUSD, returnsUSD, profitsUSD, minProfit, roi };
 }
 
 // ====================== TABLE ======================
 function buildTable() {
+  calc();
+
+  // HEADER
   let h = `<tr>
     <th style="width:28px">#</th>
+    <th class="ctr-col" style="width:50px">B/L</th>
     <th>Odds</th>
-    <th class="num-col">Prob %</th>`;
-  if (showComm) h += `<th>Commission %</th><th class="num-col">Adj. Odds</th>`;
+    <th class="num-col">Prob%</th>`;
+  if (showComm) h += `<th>Comm %</th><th class="num-col">Eff.Odds</th>`;
   h += `
     <th class="poly-th ctr-col">Poly</th>
     <th class="poly-th">Category</th>
@@ -867,35 +822,87 @@ function buildTable() {
   </tr>`;
   document.getElementById("thead").innerHTML = h;
 
-  document.getElementById("tbody").innerHTML = rows.map(row => {
-    const cur = row.currency;
-    const catOpts = CAT_KEYS.map(k => `<option value="${k}"${row.cat===k?" selected":""}>${k}</option>`).join("");
+  document.getElementById("tbody").innerHTML = rows.map((row, idx) => {
+    const cur     = row.currency;
+    const isLay   = row.betType === "lay";
+    const catOpts = CAT_KEYS.map(k =>
+      `<option value="${k}"${row.cat===k?" selected":""}>${k}</option>`
+    ).join("");
 
     let commCols = "";
-    if (showComm) commCols = `
-      <td><input type="number" min="0" max="100" step="0.01" value="${row.comm}" style="width:70px;text-align:center" oninput="onCommInput(${row.id},this.value)"></td>
-      <td class="num-col" id="ao-${row.id}">—</td>`;
+    if (showComm) {
+      const raw = parseFloat(row.odds) || 0;
+      const eff = result ? result.effArr[idx] : null;
+      commCols = `
+        <td><input type="number" min="-40" max="40" step="0.01" value="${row.comm}"
+          style="width:70px;text-align:center"
+          oninput="onCommInput(${row.id},this.value)"></td>
+        <td class="num-col" id="ao-${row.id}" style="font-size:12px">
+          ${eff ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px">${eff.toFixed(4)}</span>` : "—"}
+        </td>`;
+    }
+
+    // Liability for lay bets
+    let liabHtml = "";
+    if (isLay && result) {
+      const raw  = parseFloat(row.odds) || 0;
+      const s    = result.stakesUSD[idx];
+      const liab = s * (raw - 1);
+      const liabDisp = toDisplay(liab, cur);
+      liabHtml = `<div class="liab-badge" title="Your liability">Liab: ${CURR_SYMS[cur]}${f2(liabDisp??liab)}</div>`;
+    }
+
+    const stakeFixed = (row.isFixed || row.manualStake !== null) ? "stake-fixed" : "";
+    const stakeVal   = row.isFixed ? row.fixedStake
+      : row.manualStake !== null ? row.manualStake
+      : result ? (() => {
+          const v = toDisplay(result.stakesUSD[idx], cur);
+          return v !== null ? f2(v) : "";
+        })() : "";
 
     return `
-    <tr>
-      <td class="ctr-col" style="font:600 11px/1 var(--mono);color:var(--text3)">${rows.indexOf(row)+1}</td>
-      <td><input type="number" min="1.001" step="0.01" value="${row.odds}" style="width:88px;text-align:center" oninput="onOddsInput(${row.id},this.value)"></td>
-      <td class="num-col" id="prob-${row.id}" style="font-size:12px">—</td>
-      ${commCols}
-      <td class="poly-td ctr-col"><input type="checkbox" ${row.usePoly?"checked":""} onchange="onPolyChange(${row.id},this.checked)"></td>
-      <td class="poly-td"><select id="catsel-${row.id}" ${row.usePoly?"":"disabled"} onchange="onCatChange(${row.id},this.value)">${catOpts}</select></td>
-      <td id="fee-${row.id}" class="poly-td num-col"><span style="color:var(--text3)">—</span></td>
+    <tr class="${isLay?"is-lay":""}">
+      <td class="ctr-col" style="font:600 11px/1 'JetBrains Mono',monospace;color:var(--text3)">${idx+1}</td>
       <td class="ctr-col">
-        <button class="cur-btn ${cur==="USD"?"cur-usd":"cur-brl"}" id="curbtn-${row.id}" onclick="toggleCur(${row.id})">${cur==="USD"?"$ USD":"R$ BRL"}</button>
+        <button class="bl-btn ${isLay?"lay":"back"}" onclick="toggleBL(${row.id})" title="${isLay?"Lay (you're the bookmaker)":"Back (you're the bettor)"}">${isLay?"−":"+"}</button>
+      </td>
+      <td><input type="number" min="1.001" step="0.01" value="${row.odds}" style="width:88px;text-align:center"
+        placeholder="${isLay?"Lay odds":"Back odds"}"
+        oninput="onOddsInput(${row.id},this.value)"></td>
+      <td class="num-col" id="prob-${row.id}" style="font-size:12px">
+        ${(parseFloat(row.odds)||0) > 1 ? (100/(parseFloat(row.odds))).toFixed(1)+"%" : "—"}
+      </td>
+      ${commCols}
+      <td class="poly-td ctr-col">
+        <input type="checkbox" ${row.usePoly&&!isLay?"checked":""} ${isLay?"disabled":""} onchange="onPolyChange(${row.id},this.checked)" title="${isLay?"Polymarket only for back bets":"Use Polymarket taker fee"}">
+      </td>
+      <td class="poly-td">
+        <select id="catsel-${row.id}" ${(row.usePoly&&!isLay)?"":"disabled"} onchange="onCatChange(${row.id},this.value)">${catOpts}</select>
+      </td>
+      <td id="fee-${row.id}" class="poly-td num-col">
+        ${(!isLay && row.usePoly) ? (() => {
+          const fp = takerFeePct(parseFloat(row.odds)||0, parseFloat(row.comm)||0, row.cat);
+          return fp > 0 ? `<span class="fee-badge">${fp.toFixed(3)}%</span>` : `<span style="color:var(--text3)">—</span>`;
+        })() : `<span style="color:var(--text3)">—</span>`}
+      </td>
+      <td class="ctr-col">
+        <button class="cur-btn ${cur==="EUR"?"eur":""}" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":cur==="EUR"?"€ EUR":"R$ BRL"}</button>
       </td>
       <td>
-        <div style="display:flex;align-items:center;gap:4px">
-          <span id="cursym-${row.id}" style="font:400 11px/1 var(--mono);color:var(--text3)">${currSym(cur)}</span>
-          <input type="number" id="stake-${row.id}" class="${row.isFixed?"stake-fixed":""}" style="width:92px;text-align:right" oninput="onStakeInput(${row.id},this.value)" value="${row.isFixed?row.fixedStake:""}">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <div style="display:flex;align-items:center;gap:4px">
+            <span id="cursym-${row.id}" style="font:400 11px/1 'JetBrains Mono',monospace;color:var(--text3)">${CURR_SYMS[cur]}</span>
+            <input type="number" id="stake-${row.id}" class="${stakeFixed}" style="width:92px;text-align:right"
+              oninput="onStakeInput(${row.id},this.value)"
+              value="${stakeVal}"
+              placeholder="${isLay?"Backer stake":"Your stake"}">
+          </div>
+          ${liabHtml}
         </div>
       </td>
       <td class="ctr-col" id="fixcell-${row.id}">
-        <button class="fix-btn ${row.isFixed?"fix-on":"fix-off"}" onclick="toggleFix(${row.id})" title="${row.isFixed?"Desfixar":"Fixar stake"}">${row.isFixed?"🔒":"🔓"}</button>
+        <button class="fix-btn ${row.isFixed?"fix-on":"fix-off"}" onclick="toggleFix(${row.id})"
+          title="${row.isFixed?"Unfix stake":"Fix this stake"}">${row.isFixed?"🔒":"🔓"}</button>
       </td>
       <td id="profit-${row.id}" class="num-col">—</td>
     </tr>`;
@@ -905,158 +912,253 @@ function buildTable() {
 }
 
 function updateDisplay() {
-  if (!result) return;
+  if (!result) {
+    document.getElementById("tfoot").innerHTML = "";
+    document.getElementById("cards").innerHTML = `
+      <div class="card"><div class="card-label">Verdict</div><div class="card-value" style="color:var(--text3)">Enter odds</div></div>`;
+    return;
+  }
 
   rows.forEach((row, i) => {
-    const raw = parseFloat(row.odds) || 0;
-
-    // Prob %
-    const probEl = document.getElementById(`prob-${row.id}`);
-    if (probEl) probEl.textContent = raw > 1 ? (100 / raw).toFixed(1) + "%" : "—";
-
-    // Adj odds
-    if (showComm) {
-      const ao = document.getElementById(`ao-${row.id}`);
-      if (ao) ao.textContent = raw > 1 ? (raw * (1 - (parseFloat(row.comm)||0)/100) + (parseFloat(row.comm)||0)/100).toFixed(4) : "—";
-    }
-
-    // Taker fee
-    const feeEl = document.getElementById(`fee-${row.id}`);
-    if (feeEl) {
-      const fp = row.usePoly ? takerFeePct(raw, parseFloat(row.comm)||0, row.cat) : 0;
-      feeEl.innerHTML = fp > 0 ? `<span class="fee-badge">${fp.toFixed(3)}%</span>` : `<span style="color:var(--text3)">—</span>`;
-    }
-
-    // Stake
-    const stakeEl = document.getElementById(`stake-${row.id}`);
-    if (stakeEl && !row.isFixed && document.activeElement !== stakeEl) {
-      const v = toDisplay(result.stakesUSD[i], row.currency);
-      stakeEl.value = v !== null ? f2(v) : "";
-    }
-
-    // Profit
+    // Profit cell
     const profEl = document.getElementById(`profit-${row.id}`);
     if (profEl) {
       const pUSD = result.profitsUSD[i];
       const disp = toDisplay(pUSD, row.currency);
       const sign = pUSD >= 0 ? "+" : "";
       const cls  = pUSD >= -0.005 ? "pos" : "neg";
-      const main = disp !== null ? `${sign}${currSym(row.currency)}${Math.abs(disp).toFixed(2)}` : `${sign}$${Math.abs(pUSD).toFixed(2)}`;
-      const sub  = row.currency === "BRL" && usdcBrl ? `<div class="dim">${sign}$${f2(Math.abs(pUSD))}</div>` : "";
+      const sym  = CURR_SYMS[row.currency];
+      const main = disp !== null ? `${sign}${sym}${Math.abs(disp).toFixed(2)}` : `${sign}$${Math.abs(pUSD).toFixed(2)}`;
+      const sub  = row.currency !== "USD" && disp !== null ? `<div class="dim">${sign}$${f2(Math.abs(pUSD))}</div>` : "";
       profEl.innerHTML = `<span class="${cls}">${main}</span>${sub}`;
+    }
+
+    // Stake
+    const stakeEl = document.getElementById(`stake-${row.id}`);
+    if (stakeEl && !row.isFixed && row.manualStake === null && document.activeElement !== stakeEl) {
+      const v = toDisplay(result.stakesUSD[i], row.currency);
+      stakeEl.value = v !== null ? f2(v) : "";
+    }
+
+    // Liability update (for lay rows)
+    if (row.betType === "lay") {
+      const raw  = parseFloat(row.odds) || 0;
+      const s    = result.stakesUSD[i];
+      const liab = s * (raw - 1);
+      const liabDisp = toDisplay(liab, row.currency);
+      const sym  = CURR_SYMS[row.currency];
+      // find existing liab-badge
+      const cell = document.getElementById(`stake-${row.id}`)?.closest("td");
+      if (cell) {
+        let badge = cell.querySelector(".liab-badge");
+        if (!badge) {
+          badge = document.createElement("div");
+          badge.className = "liab-badge";
+          cell.querySelector("div").appendChild(badge);
+        }
+        badge.textContent = `Liab: ${sym}${f2(liabDisp??liab)}`;
+      }
     }
   });
 
   // FOOTER
-  const commCols = showComm ? 2 : 0;
-  const colsBeforeStake = 7 + commCols;
-  const tfootHTML = result ? `
+  const colCount = 5 + (showComm ? 2 : 0) + 4; // #, B/L, odds, prob, [comm,eff], poly×3, cur, stake, fix, profit
+  const colsBeforeStake = colCount - 2; // stake + profit remain
+  document.getElementById("tfoot").innerHTML = `
     <tr>
-      <td colspan="${colsBeforeStake}" style="text-align:right;color:var(--text2);font:500 12px/1 var(--sans)">Total stake (USD):</td>
-      <td><div style="display:flex;align-items:center;gap:4px"><span style="color:var(--text3);font-family:var(--mono);font-size:11px">$</span><input readonly value="${f2(result.totalUSD)}" style="width:92px;text-align:right;font-weight:700"></div></td>
+      <td colspan="${colsBeforeStake}" style="text-align:right;color:var(--text2);font:500 12px/1 'DM Sans',sans-serif">
+        Total stake (USD):</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px">$</span>
+          <input readonly value="${f2(result.totalUSD)}" style="width:92px;text-align:right;font-weight:700">
+        </div>
+      </td>
       <td></td>
-      <td class="num-col"><span class="pos">+$${f2(result.minProfit)}</span>${usdcBrl?`<div class="dim">+R$${(result.minProfit*usdcBrl).toFixed(2)}</div>`:""}</td>
-    </tr>` : "";
-  document.getElementById("tfoot").innerHTML = tfootHTML;
+      <td class="num-col">
+        <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
+        ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}
+        ${rates.EUR?`<div class="dim">€${f2(result.minProfit*rates.EUR)}</div>`:""}
+      </td>
+    </tr>`;
 
   // CARDS
-  const cardsHTML = result ? `
-    <div class="card ${result.isSurebet?"green":"red"}"><div class="card-label">Verdict</div><div class="card-value">${result.isSurebet?"✓ Surebet":"✗ No arb"}</div></div>
-    <div class="card ${result.isSurebet?"green":"red"}"><div class="card-label">Margin</div><div class="card-value">${(result.margin*100).toFixed(3)}%</div></div>
-    <div class="card"><div class="card-label">Total USD</div><div class="card-value">$${f2(result.totalUSD)}</div></div>
-    ${usdcBrl?`<div class="card"><div class="card-label">Total BRL</div><div class="card-value">R$${(result.totalUSD*usdcBrl).toFixed(2)}</div></div>`:""}
-    <div class="card ${result.isSurebet?"green":"red"}"><div class="card-label">Min Profit</div><div class="card-value">+$${f2(result.minProfit)}</div></div>
-    <div class="card ${result.isSurebet?"green":"red"}"><div class="card-label">ROI</div><div class="card-value">${result.roi.toFixed(2)}%</div></div>` : "";
-  document.getElementById("cards").innerHTML = cardsHTML;
+  document.getElementById("cards").innerHTML = `
+    <div class="card ${result.isSurebet?"green":"red"}">
+      <div class="card-label">Verdict</div>
+      <div class="card-value">${result.isSurebet?"✓ Surebet":"✗ No arb"}</div>
+    </div>
+    <div class="card ${result.isSurebet?"green":"red"}">
+      <div class="card-label">Margin (Σ1/eff)</div>
+      <div class="card-value">${(result.margin*100).toFixed(3)}%</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Total USD</div>
+      <div class="card-value">$${f2(result.totalUSD)}</div>
+    </div>
+    ${rates.EUR?`<div class="card"><div class="card-label">Total EUR</div><div class="card-value">€${f2(result.totalUSD*rates.EUR)}</div></div>`:""}
+    ${rates.BRL?`<div class="card"><div class="card-label">Total BRL</div><div class="card-value">R$${f2(result.totalUSD*rates.BRL)}</div></div>`:""}
+    <div class="card ${result.isSurebet?"green":"red"}">
+      <div class="card-label">Min Profit</div>
+      <div class="card-value">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</div>
+    </div>
+    <div class="card ${result.isSurebet?"green":"red"}">
+      <div class="card-label">ROI</div>
+      <div class="card-value">${result.roi.toFixed(2)}%</div>
+    </div>`;
 
   document.getElementById("brl-warn").style.display =
-    (rows.some(r=>r.currency==="BRL") && !usdcBrl) ? "" : "none";
+    (rows.some(r=>r.currency==="BRL") && !rates.BRL) ? "" : "none";
 }
 
 // ====================== HANDLERS ======================
-function onOddsInput(id, val) { rows.find(r=>r.id===id).odds = val; calc(); updateDisplay(); }
-function onCommInput(id, val) { rows.find(r=>r.id===id).comm = val; calc(); updateDisplay(); }
+function onOddsInput(id, val)  { rows.find(r=>r.id===id).odds = val; calc(); updateDisplay(); }
+function onCommInput(id, val)  { rows.find(r=>r.id===id).comm = val; calc(); updateDisplay(); }
 function onPolyChange(id, checked) {
   const row = rows.find(r=>r.id===id);
   row.usePoly = checked;
   const sel = document.getElementById(`catsel-${id}`);
   if (sel) sel.disabled = !checked;
-  calc(); updateDisplay();
-}
-function onCatChange(id, val) { rows.find(r=>r.id===id).cat = val; calc(); updateDisplay(); }
-function onStakeInput(id, val) {
-  rows.forEach(r => { if (r.id !== id) { r.isFixed = false; r.fixedStake = ""; } });
-  const row = rows.find(r=>r.id===id);
-  row.isFixed = true;
-  row.fixedStake = val;
-  calc(); updateDisplay();
-}
-function toggleCur(id) {
-  const row = rows.find(r=>r.id===id);
-  const oldCur = row.currency;
-  row.currency = oldCur === "USD" ? "BRL" : "USD";
-  if (row.isFixed && row.fixedStake && usdcBrl) {
-    const usd = oldCur === "USD" ? parseFloat(row.fixedStake) : parseFloat(row.fixedStake) / usdcBrl;
-    row.fixedStake = f2(row.currency === "USD" ? usd : usd * usdcBrl);
-  }
   calc(); buildTable();
 }
+function onCatChange(id, val) { rows.find(r=>r.id===id).cat = val; calc(); updateDisplay(); }
+
+function onStakeInput(id, val) {
+  const row = rows.find(r=>r.id===id);
+
+  if (row.isFixed) {
+    // Updating the already-fixed anchor row — just update its value, keep manual stakes intact
+    row.fixedStake = val;
+  } else {
+    const existingFixed = rows.find(r => r.isFixed);
+    if (existingFixed) {
+      // There's already an anchor — treat this as a manual override (0 is valid)
+      row.manualStake = (val === "" || val === null) ? null : val;
+    } else {
+      // No anchor yet — this row becomes the new anchor
+      rows.forEach(r => { if (r.id !== id) { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; } });
+      row.isFixed    = true;
+      row.fixedStake = val;
+      row.manualStake = null;
+    }
+  }
+  calc(); updateDisplay();
+}
+
+function toggleBL(id) {
+  const row = rows.find(r=>r.id===id);
+  row.betType = row.betType === "back" ? "lay" : "back";
+  if (row.betType === "lay") { row.usePoly = false; } // poly only for back
+  calc(); buildTable();
+}
+
+function cycleCur(id) {
+  const row = rows.find(r=>r.id===id);
+  const order = ["USD","EUR","BRL"];
+  const next  = order[(order.indexOf(row.currency)+1) % order.length];
+  if (row.isFixed && row.fixedStake) {
+    // convert fixed stake to new currency
+    const usd = toUSD(parseFloat(row.fixedStake), row.currency);
+    row.fixedStake = f2(fromUSD(usd, next) ?? usd);
+  }
+  if (row.manualStake !== null && row.manualStake !== "") {
+    const usd = toUSD(parseFloat(row.manualStake), row.currency);
+    row.manualStake = f2(fromUSD(usd, next) ?? usd);
+  }
+  row.currency = next;
+  calc(); buildTable();
+}
+
+function toUSD(amt, cur) {
+  if (cur==="USD") return amt;
+  if (cur==="EUR") return rates.EUR ? amt / rates.EUR : amt;
+  if (cur==="BRL") return rates.BRL ? amt / rates.BRL : amt;
+  return amt;
+}
+function fromUSD(usd, cur) {
+  if (cur==="USD") return usd;
+  if (cur==="EUR") return rates.EUR ? usd * rates.EUR : null;
+  if (cur==="BRL") return rates.BRL ? usd * rates.BRL : null;
+  return null;
+}
+
 function toggleFix(id) {
   const row = rows.find(r=>r.id===id);
   if (row.isFixed) {
-    row.isFixed = false;
-    row.fixedStake = "";
+    row.isFixed = false; row.fixedStake = "";
   } else {
-    rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; });
+    rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; });
     row.isFixed = true;
-    const idx = rows.indexOf(row);
-    const usd = result ? result.stakesUSD[idx] : 0;
-    row.fixedStake = f2(toDisplay(usd, row.currency) ?? usd);
+    const idx  = rows.indexOf(row);
+    const usd  = result ? result.stakesUSD[idx] : 0;
+    const disp = fromUSD(usd, row.currency);
+    row.fixedStake = f2(disp ?? usd);
   }
   calc(); buildTable();
 }
 
 // ====================== UTILITIES ======================
 function copyStakes() {
-  if (!result) return alert("Nada para copiar");
-  let txt = "Surebet Stakes\n\n";
+  if (!result) return alert("No stakes to copy — enter odds first.");
+  let txt = "Surebet Stakes\n";
+  txt += `Fork type: ${forkType}\n\n`;
   rows.forEach((r,i) => {
-    const usd = result.stakesUSD[i];
-    txt += `Outcome ${i+1}: $${f2(usd)} USD`;
-    if (r.currency === "BRL" && usdcBrl) txt += `  /  R$${f2(usd*usdcBrl)} BRL`;
-    txt += "\n";
+    const usd  = result.stakesUSD[i];
+    const disp = fromUSD(usd, r.currency);
+    const sym  = CURR_SYMS[r.currency];
+    txt += `Outcome ${i+1} [${r.betType.toUpperCase()}]: ${sym}${f2(disp??usd)} ${r.currency}`;
+    if (r.betType==="lay") {
+      const raw  = parseFloat(r.odds)||0;
+      const liab = usd * (raw - 1);
+      txt += `  (Liability: ${sym}${f2(fromUSD(liab,r.currency)??liab)})`;
+    }
+    txt += `\n`;
   });
-  txt += `\nTotal USD: $${f2(result.totalUSD)}\nMin Profit: +$${f2(result.minProfit)}`;
+  txt += `\nTotal USD: $${f2(result.totalUSD)}\nMin Profit: +$${f2(result.minProfit)}\nROI: ${result.roi.toFixed(2)}%`;
   navigator.clipboard.writeText(txt).then(() => {
     const btn = document.getElementById("copy-btn");
     const orig = btn.textContent;
-    btn.textContent = "✅ Copiado!";
+    btn.textContent = "✅ Copied!";
     setTimeout(() => btn.textContent = orig, 1800);
   });
 }
 
 function loadExample() {
-  numOut = 3;
+  numOut = 3; forkType = "1-X-2";
   rows = [
-    {id:1, odds:"2.12", comm:"0", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
-    {id:2, odds:"3.55", comm:"0", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
-    {id:3, odds:"4.10", comm:"0", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""}
+    {id:1, odds:"2.12", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
+    {id:2, odds:"3.55", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
+    {id:3, odds:"4.10", comm:"0", betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""}
   ];
   nextId = 4;
-  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent == "3"));
+  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="3"));
+  buildForkSelect();
+  document.getElementById("fork-type").value = forkType;
+  calc(); buildTable();
+}
+
+function loadLayExample() {
+  numOut = 2; forkType = "1-X2";
+  rows = [
+    {id:1, odds:"2.40", comm:"0",   betType:"back", usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""},
+    {id:2, odds:"2.10", comm:"5",   betType:"lay",  usePoly:false, cat:"Sports", currency:"USD", isFixed:false, fixedStake:""}
+  ];
+  nextId = 3;
+  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
+  buildForkSelect();
+  document.getElementById("fork-type").value = forkType;
   calc(); buildTable();
 }
 
 function resetAll() {
-  numOut = 2;
+  numOut = 2; forkType = "1-2";
   rows = [makeRow(1), makeRow(2)];
-  nextId = 3;
-  roundValue = 0;
-  roundUseFx = false;
-  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent == "2"));
+  nextId = 3; roundValue = 0; roundUseFx = false;
+  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
+  buildForkSelect();
   document.getElementById("round-off-btn").classList.add("on");
-  ["round-1-btn","round-5-btn","round-10-btn"].forEach(id => { const e=document.getElementById(id); if(e)e.classList.remove("on"); });
-  document.getElementById("round-fx-btn").textContent = "FX rounding: OFF";
+  document.getElementById("round-custom").value = ""; document.getElementById("round-custom").disabled = true;
+  document.getElementById("round-fx-btn").textContent = "FX round: OFF";
   document.getElementById("round-fx-btn").classList.remove("on");
   showComm = true;
   document.getElementById("show-comm-btn").textContent = "Hide commissions";
@@ -1065,19 +1167,17 @@ function resetAll() {
 }
 
 // ====================== INIT ======================
-setInterval(fetchRate, 5000);
-fetchRate();
+setInterval(fetchRates, 5000);
+fetchRates();
 buildTable();
 
-// Initialize button states
+// button initial states
 document.getElementById("round-off-btn").classList.add("on");
 document.getElementById("show-comm-btn").classList.add("on");
 
-// Theme persistence — dark by default
+// theme persistence
 const storedTheme = localStorage.getItem("darkMode");
-if (storedTheme !== null) {
-  darkMode = storedTheme === "true";
-} // else stays true (dark default)
+if (storedTheme !== null) { darkMode = storedTheme === "true"; }
 document.body.classList.toggle("light", !darkMode);
 document.getElementById("theme-btn").textContent = darkMode ? "☀️ Light" : "🌙 Dark";
 </script>
