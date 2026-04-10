@@ -101,7 +101,7 @@
     color: var(--text);
     background: var(--bg);
     min-height: 100vh;
-    padding: 22px 14px 72px;
+    padding: 22px 14px 56px;
     line-height: 1.5;
     transition: background .28s, color .28s;
   }
@@ -319,28 +319,39 @@
     padding: 2px 8px; border-radius: 20px; letter-spacing: .02em;
   }
 
-  /* ─── SUMMARY CARDS ─── */
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 14px; }
-  .card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 13px 15px;
-    transition: border-color .2s, box-shadow .2s; position: relative; overflow: hidden;
-  }
-  .card::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.02) 0%,transparent 60%); pointer-events:none; }
-  .card-label { font: 600 9.5px/1 'DM Sans',sans-serif; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
-  .card-value { font: 700 17px/1.2 'JetBrains Mono',monospace; color: var(--text); }
-  .card.green { border-color: var(--green-border); background: var(--green-bg); box-shadow: 0 0 20px var(--green-glow); }
-  .card.green .card-value { color: var(--green-bright); }
-  .card.green .card-label { color: rgba(52,211,153,.4); }
-  .card.red { border-color: var(--red-border); background: var(--red-bg); box-shadow: 0 0 20px var(--red-glow); }
-  .card.red .card-value { color: var(--red); }
-  .card.red .card-label { color: rgba(244,63,94,.4); }
-
   /* ─── ACTIONS ─── */
   .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
   .actions .btn { padding: 8px 18px; font-size: 12.5px; }
   .actions .btn.primary { background: var(--cyan-dim); border-color: rgba(34,211,238,.3); color: var(--cyan); }
   .actions .btn.primary:hover { background: rgba(34,211,238,.14); border-color: var(--cyan); }
+
+  /* ─── ROI BADGE ─── */
+  .roi-badge {
+    font: 700 15px/1 'JetBrains Mono', monospace;
+    padding: 6px 14px; border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text3);
+    transition: all .2s;
+    white-space: nowrap; align-self: center;
+  }
+  .roi-badge.arb  { background: var(--green-bg); border-color: var(--green-border); color: var(--green-bright); box-shadow: 0 0 14px var(--green-glow); }
+  .roi-badge.noarb { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
+
+  /* ─── SITE FOOTER ─── */
+  .site-footer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 10px 20px;
+    text-align: center;
+    font: 400 12px/1 'DM Sans', sans-serif;
+    color: var(--text3);
+  }
+  .site-footer a {
+    color: var(--cyan); text-decoration: none; font-weight: 600;
+    transition: opacity .15s;
+  }
+  .site-footer a:hover { opacity: .75; }
 
   .warn-bar { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); border-radius: var(--r-sm); padding: 5px 12px; font-size: 12px; }
 
@@ -362,9 +373,10 @@
   <div class="hdr">
     <div class="hdr-brand">
       <h1>Sure<em>bet</em></h1>
-      <div class="sub">v3.0 · Arbitrage + Polymarket · Back &amp; Lay</div>
+      <div class="sub">Surebet Calculator</div>
     </div>
     <div class="hdr-right">
+      <div id="roi-badge" class="roi-badge" style="display:none">—</div>
       <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
       <div class="ticker-wrap">
         <div class="ticker">
@@ -406,17 +418,15 @@
     </table>
   </div>
 
-  <!-- ── SUMMARY CARDS ── -->
-  <div class="cards" id="cards"></div>
-
   <!-- ── ACTIONS ── -->
   <div class="actions">
     <button class="btn primary" onclick="shareOdds()" id="copy-btn">🔗 Share odds</button>
     <button class="btn" onclick="resetAll()">Reset all</button>
   </div>
 
-
 </div>
+
+<footer class="site-footer">Feito com amor ❤️ por <a href="https://polymarket.com/?r=hgx" target="_blank" rel="noopener">nagato</a></footer>
 
 <script>
 // ====================== CONFIG ======================
@@ -833,10 +843,10 @@ function buildTable() {
 }
 
 function updateDisplay() {
+  const roiBadge = document.getElementById("roi-badge");
   if (!result) {
     document.getElementById("tfoot").innerHTML = "";
-    document.getElementById("cards").innerHTML = `
-      <div class="card"><div class="card-label">Verdict</div><div class="card-value" style="color:var(--text3)">Enter odds</div></div>`;
+    if (roiBadge) { roiBadge.style.display = "none"; }
     return;
   }
 
@@ -958,29 +968,12 @@ function updateDisplay() {
     }
   }
 
-  // CARDS
-  document.getElementById("cards").innerHTML = `
-    <div class="card ${result.isSurebet?"green":"red"}">
-      <div class="card-label">Verdict</div>
-      <div class="card-value">${result.isSurebet?"✓ Surebet":"✗ No arb"}</div>
-    </div>
-    <div class="card ${result.isSurebet?"green":"red"}">
-      <div class="card-label">Margin (Σ1/eff)</div>
-      <div class="card-value">${(result.margin*100).toFixed(3)}%</div>
-    </div>
-    <div class="card">
-      <div class="card-label">Total USD</div>
-      <div class="card-value">$${f2(result.totalUSD)}</div>
-    </div>
-    ${rates.BRL?`<div class="card"><div class="card-label">Total BRL</div><div class="card-value">R$${f2(result.totalUSD*rates.BRL)}</div></div>`:""}
-    <div class="card ${result.isSurebet?"green":"red"}">
-      <div class="card-label">Min Profit</div>
-      <div class="card-value">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</div>
-    </div>
-    <div class="card ${result.isSurebet?"green":"red"}">
-      <div class="card-label">ROI</div>
-      <div class="card-value">${result.roi.toFixed(2)}%</div>
-    </div>`;
+  // ROI BADGE (top-right)
+  if (roiBadge) {
+    roiBadge.style.display = "";
+    roiBadge.textContent = result.roi.toFixed(2) + "%";
+    roiBadge.className = "roi-badge " + (result.isSurebet ? "arb" : "noarb");
+  }
 
   document.getElementById("brl-warn").style.display =
     (rows.some(r=>r.currency==="BRL") && !rates.BRL) ? "" : "none";
