@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="format-detection" content="telephone=no">
+<link rel="icon" href="logo.png" type="image/png">
 <title>Surebet Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -146,35 +147,7 @@
   }
   .theme-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 
-  /* ─── TICKER ─── */
-  .ticker-wrap {
-    display: flex; gap: 8px;
-  }
-  .ticker {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 10px 14px; min-width: 170px;
-  }
-  .ticker-top {
-    display: flex; align-items: center; justify-content: space-between;
-    font: 600 10px/1 'DM Sans',sans-serif; color: var(--text2);
-    text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px;
-  }
-  .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: middle; flex-shrink: 0; }
-  @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(.75)} }
-  .dot-ok   { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .dot-err  { background: var(--red); }
-  .dot-load { background: var(--amber); animation: pulse-dot 1.2s ease-in-out infinite; }
-  .refresh-btn {
-    background: none; border: none; color: var(--text3);
-    cursor: pointer; font-size: 15px; padding: 0;
-    transition: color .15s, transform .35s cubic-bezier(.34,1.56,.64,1); line-height: 1;
-  }
-  .refresh-btn:hover { color: var(--cyan); transform: rotate(180deg); }
-  .ticker-price { font: 700 20px/1 'JetBrains Mono',monospace; color: var(--text); display: flex; align-items: baseline; gap: 8px; }
-  .ticker-time   { font: 400 10px/1 'JetBrains Mono',monospace; color: var(--text3); }
-  .ticker-source { font-size: 10px; color: var(--text3); margin-top: 3px; }
-  .ticker-note   { font: 400 9.5px/1 'JetBrains Mono',monospace; color: var(--text3); margin-top: 5px; opacity: .7; }
-  .ticker-load   { font: 400 11px/1 'JetBrains Mono',monospace; color: var(--text3); padding: 4px 0; }
+  /* ticker CSS removed – backend-only */
 
   /* ─── CONTROLS ─── */
   .controls {
@@ -367,19 +340,6 @@
   <div class="hdr-brand">
     <img src="logo.png" alt="Logo" style="height:64px;width:auto;display:block;">
   </div>
-  <div class="hdr-center">
-    <div class="ticker-wrap">
-      <div class="ticker">
-        <div class="ticker-top">
-          <span><span class="dot dot-load" id="dot-brl"></span>USD/BRL</span>
-          <button class="refresh-btn" onclick="fetchRates()" title="Atualizar">↺</button>
-        </div>
-        <div id="ticker-brl"><div class="ticker-load">Buscando…</div></div>
-        <div class="ticker-note">↻ 5s</div>
-      </div>
-    </div>
-    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
-  </div>
   <div class="hdr-right">
     <div id="roi-badge" class="roi-badge" style="display:none">—</div>
   </div>
@@ -416,6 +376,7 @@
   <!-- ── ACTIONS ── -->
   <div class="actions">
     <button class="btn primary" onclick="shareOdds()" id="copy-btn">🔗 Share odds</button>
+    <button class="btn primary" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
     <button class="btn" onclick="resetAll()">Reset all</button>
   </div>
 
@@ -468,6 +429,7 @@ let roundUseFx = false;
 let nextId     = 3;
 let rows       = [makeRow(1), makeRow(2)];
 let rates      = { USD: 1, BRL: null };
+let globalCustomRate = null;   // user-typed BRL/USD rate — overrides live rate everywhere
 let lastUpdated = null;
 let result      = null;
 let darkMode    = true;
@@ -522,11 +484,22 @@ function takerFeePct(raw, commPct, catKey) {
   return feeRate * Math.pow(p * (1 - p), exponent) * 100;
 }
 
-function f2(n) { return (typeof n==="number" && isFinite(n)) ? n.toFixed(2) : "—"; }
+function f2(n, maxDec = 2) {
+  if (typeof n !== "number" || !isFinite(n)) return "—";
+  // For very small values show more decimals so nothing rounds to zero
+  if (Math.abs(n) > 0 && Math.abs(n) < 0.01) return n.toFixed(4);
+  if (Math.abs(n) > 0 && Math.abs(n) < 0.10) return n.toFixed(3);
+  return n.toFixed(maxDec);
+}
+
+function getRate() {
+  // When user has typed a custom rate, it freezes the live rate globally
+  return globalCustomRate !== null ? globalCustomRate : rates.BRL;
+}
 
 function toDisplay(usdAmt, currency) {
   if (currency === "USD") return usdAmt;
-  if (currency === "BRL") return rates.BRL ? usdAmt * rates.BRL : null;
+  if (currency === "BRL") { const r = getRate(); return r ? usdAmt * r : null; }
   return null;
 }
 
@@ -540,10 +513,6 @@ function toggleTheme() {
 
 // ====================== RATE FETCHER ======================
 async function fetchRates() {
-  ["dot-brl"].forEach(id => {
-    document.getElementById(id).className = "dot dot-load";
-  });
-
   const attempts = [
     async () => {
       const brlRes = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL",{cache:"no-store"}).then(r=>r.json());
@@ -576,19 +545,12 @@ async function fetchRates() {
     if (brl > 0) { gotRates(brl, "Binance USDT"); return; }
   } catch (_) {}
 
-  document.getElementById("ticker-brl").innerHTML = `<div style="color:var(--red);font-size:11px;font-family:'JetBrains Mono',monospace">Falha</div>`;
-  ["dot-brl"].forEach(id => { document.getElementById(id).className = "dot dot-err"; });
+  // all sources failed silently – calc will show BRL rows as unavailable
 }
 
 function gotRates(brl, source) {
   rates.BRL = brl;
   lastUpdated = new Date();
-  const t = lastUpdated.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
-
-  document.getElementById("dot-brl").className = "dot dot-ok";
-  document.getElementById("ticker-brl").innerHTML = `
-    <div class="ticker-price">R$${brl.toFixed(4)}<span class="ticker-time">${t}</span></div>
-    <div class="ticker-source">${source}</div>`;
 
   calc(); updateDisplay();
 }
@@ -598,7 +560,7 @@ function buildForkSelect() {
   const sel = document.getElementById("fork-type");
   const types = numOut === 2 ? FORK_TYPES_2 : numOut === 3 ? FORK_TYPES_3 : FORK_TYPES_N;
   sel.innerHTML = types.map(t =>
-    `<option value="${t.id}" title="${t.hint}"${forkType===t.id?" selected":""}>${t.label}</option>`
+    `<option value="${t.id}"${forkType===t.id?" selected":""}>${t.label}</option>`
   ).join("");
   // default fork
   if (!types.find(t=>t.id===forkType)) {
@@ -669,7 +631,7 @@ function calc() {
     // Convert fixed stake to USD
     let usdFixed;
     if (fRow.currency === "USD") usdFixed = raw;
-    else if (fRow.currency === "BRL") usdFixed = rates.BRL ? raw / rates.BRL : raw;
+    else if (fRow.currency === "BRL") { const r = getRate(); usdFixed = r ? raw / r : raw; }
     else usdFixed = raw;
     target = usdFixed * effArr[fixIdx];
   } else {
@@ -686,7 +648,7 @@ function calc() {
       if (raw !== null && !isNaN(raw)) {
         let usdManual;
         if (r.currency === "USD") usdManual = raw;
-        else if (r.currency === "BRL") usdManual = rates.BRL ? raw / rates.BRL : raw;
+        else if (r.currency === "BRL") { const rt = getRate(); usdManual = rt ? raw / rt : raw; }
         else usdManual = raw;
         stakesUSD[i] = usdManual;
       }
@@ -696,10 +658,11 @@ function calc() {
   if (roundValue > 0) {
     stakesUSD = stakesUSD.map((s, i) => {
       const row = rows[i];
-      if (roundUseFx && row.currency === "BRL" && rates.BRL) {
-        const brl     = s * rates.BRL;
+      const r = getRate();
+      if (roundUseFx && row.currency === "BRL" && r) {
+        const brl     = s * r;
         const rounded = Math.ceil(brl / roundValue) * roundValue;
-        return rounded / rates.BRL;
+        return rounded / r;
       }
       return Math.ceil(s / roundValue) * roundValue;
     });
@@ -763,7 +726,7 @@ function buildTable() {
       const s    = result.stakesUSD[idx];
       const liab = s * (raw - 1);
       const liabDisp = toDisplay(liab, cur);
-      liabHtml = `<div class="liab-badge" title="Your liability">Liab: ${CURR_SYMS[cur]}${f2(liabDisp??liab)}</div>`;
+      liabHtml = `<div class="liab-badge">Liab: ${CURR_SYMS[cur]}${f2(liabDisp??liab)}</div>`;
     }
 
     const stakeFixed = (row.isFixed || row.manualStake !== null) ? "stake-fixed" : "";
@@ -778,7 +741,7 @@ function buildTable() {
     <tr class="${isLay?"is-lay":""}">
       <td class="ctr-col" style="font:600 11px/1 'JetBrains Mono',monospace;color:var(--text3)">${idx+1}</td>
       <td class="ctr-col">
-        <button class="bl-btn ${isLay?"lay":"back"}" onclick="toggleBL(${row.id})" title="${isLay?"Lay (you're the bookmaker)":"Back (you're the bettor)"}">${isLay?"−":"+"}</button>
+        <button class="bl-btn ${isLay?"lay":"back"}" onclick="toggleBL(${row.id})">${isLay?"−":"+"}</button>
       </td>
       <td><input type="number" min="1.001" step="0.01" value="${row.odds}" style="width:88px;text-align:center"
         placeholder="${isLay?"Lay odds":"Back odds"}"
@@ -788,7 +751,7 @@ function buildTable() {
       </td>
       ${commCols}
       <td class="poly-td ctr-col">
-        <input type="checkbox" ${row.usePoly&&!isLay?"checked":""} ${isLay?"disabled":""} onchange="onPolyChange(${row.id},this.checked)" title="${isLay?"Polymarket only for back bets":"Use Polymarket taker fee"}">
+        <input type="checkbox" ${row.usePoly&&!isLay?"checked":""} ${isLay?"disabled":""} onchange="onPolyChange(${row.id},this.checked)"Polymarket only for back bets":"Use Polymarket taker fee"}">
       </td>
       <td class="poly-td">
         <select id="catsel-${row.id}" ${(row.usePoly&&!isLay)?"":"disabled"} onchange="onCatChange(${row.id},this.value)">${catOpts}</select>
@@ -804,20 +767,19 @@ function buildTable() {
           <button class="cur-btn" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":"R$ BRL"}</button>
           ${cur==="USD" ? `<div style="display:flex;align-items:center;gap:3px">
             <span style="font:400 9px/1 'JetBrains Mono',monospace;color:var(--text3)">R$/&dollar;</span>
-            <input type="number" min="0.01" step="0.01"
+            <input type="number" min="0.01" step="any"
               style="width:64px;font-size:11px;padding:3px 5px;text-align:right"
               placeholder="${rates.BRL ? rates.BRL.toFixed(2) : 'rate'}"
               value="${row.customRate !== null ? row.customRate : ''}"
-              oninput="onCustomRate(${row.id},this.value)"
-              title="Cotação USD/BRL personalizada para esta linha">
+              oninput="onCustomRate(${row.id},this.value)">
           </div>` : ""}
         </div>
       </td>
       <td>
         <div style="display:flex;flex-direction:column;gap:3px">
           <div style="display:flex;align-items:center;gap:4px">
-            <span id="cursym-${row.id}" style="font:400 11px/1 'JetBrains Mono',monospace;color:var(--text3)">${CURR_SYMS[cur]}</span>
-            <input type="number" id="stake-${row.id}" class="${stakeFixed}" style="width:92px;text-align:right"
+            <span id="cursym-${row.id}" style="font:400 11px/1 'JetBrains Mono',monospace;color:var(--text3);min-width:20px;display:inline-block;text-align:right">${CURR_SYMS[cur]}</span>
+            <input type="number" id="stake-${row.id}" step="any" class="${stakeFixed}" style="width:92px;text-align:right"
               oninput="onStakeInput(${row.id},this.value)"
               value="${stakeVal}"
               placeholder="${isLay?"Backer stake":"Your stake"}">
@@ -827,8 +789,7 @@ function buildTable() {
         </div>
       </td>
       <td class="ctr-col" id="fixcell-${row.id}">
-        <button class="fix-btn ${row.isFixed?"fix-on":"fix-off"}" onclick="toggleFix(${row.id})"
-          title="${row.isFixed?"Unfix stake":"Fix this stake"}">${row.isFixed?"🔒":"🔓"}</button>
+        <button class="fix-btn ${row.isFixed?"fix-on":"fix-off"}" onclick="toggleFix(${row.id})">${row.isFixed?"🔒":"🔓"}</button>
       </td>
       <td id="profit-${row.id}" class="num-col">—</td>
     </tr>`;
@@ -884,10 +845,10 @@ function updateDisplay() {
       stakeEl.value = v !== null ? f2(v) : "";
     }
 
-    // BRL hint for USD rows with customRate (or show with live rate when filled)
+    // BRL hint for USD rows (customRate freezes live rate while set)
     const brlHint = document.getElementById(`brl-hint-${row.id}`);
     if (brlHint && row.currency === "USD") {
-      const activeRate = row.customRate || null;
+      const activeRate = getRate();
       if (activeRate) {
         const usdAmt = result.stakesUSD[i];
         brlHint.textContent = `≈ R$${f2(usdAmt * activeRate)}`;
@@ -939,18 +900,17 @@ function updateDisplay() {
           Total stake (USD):</td>
         <td>
           <div style="display:flex;align-items:center;gap:4px">
-            <span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px">$</span>
-            <input type="number" id="total-stake-input" min="0.01" step="0.01"
+            <span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;min-width:20px;display:inline-block;text-align:right">$</span>
+            <input type="number" id="total-stake-input" min="0.01" step="any"
               value="${f2(result.totalUSD)}"
               style="width:92px;text-align:right;font-weight:700"
-              title="Edite para distribuir o total entre as apostas"
               oninput="onTotalStakeInput(this.value)">
           </div>
         </td>
         <td></td>
         <td class="num-col" id="tfoot-profit">
           <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
-          ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}
+          ${getRate()?`<div class="dim">R$${f2(result.minProfit*getRate())}</div>`:""}
         </td>
       </tr>`;
   } else {
@@ -959,7 +919,7 @@ function updateDisplay() {
     if (profitCell) {
       profitCell.innerHTML = `
         <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
-        ${rates.BRL?`<div class="dim">R$${f2(result.minProfit*rates.BRL)}</div>`:""}`;
+        ${getRate()?`<div class="dim">R$${f2(result.minProfit*getRate())}</div>`:""}`;
     }
   }
 
@@ -971,7 +931,7 @@ function updateDisplay() {
   }
 
   document.getElementById("brl-warn").style.display =
-    (rows.some(r=>r.currency==="BRL") && !rates.BRL) ? "" : "none";
+    (rows.some(r=>r.currency==="BRL") && !getRate()) ? "" : "none";
 }
 
 // ====================== HANDLERS ======================
@@ -1011,7 +971,8 @@ function cycleCur(id) {
   const row = rows.find(r=>r.id===id);
   const order = ["USD","BRL"];
   const next  = order[(order.indexOf(row.currency)+1) % order.length];
-  row.customRate = null; // reset custom rate on currency change
+  row.customRate = null;
+  globalCustomRate = null; // reset global custom rate on currency change
   if (row.isFixed && row.fixedStake) {
     // convert fixed stake to new currency
     const usd = toUSD(parseFloat(row.fixedStake), row.currency);
@@ -1027,12 +988,12 @@ function cycleCur(id) {
 
 function toUSD(amt, cur) {
   if (cur==="USD") return amt;
-  if (cur==="BRL") return rates.BRL ? amt / rates.BRL : amt;
+  if (cur==="BRL") { const r = getRate(); return r ? amt / r : amt; }
   return amt;
 }
 function fromUSD(usd, cur) {
   if (cur==="USD") return usd;
-  if (cur==="BRL") return rates.BRL ? usd * rates.BRL : null;
+  if (cur==="BRL") { const r = getRate(); return r ? usd * r : null; }
   return null;
 }
 
@@ -1064,8 +1025,10 @@ function toggleFix(id) {
 
 function onCustomRate(id, val) {
   const row = rows.find(r=>r.id===id);
-  row.customRate = (val === "" || val === null) ? null : parseFloat(val) || null;
-  updateDisplay();
+  const parsed = (val === "" || val === null) ? null : parseFloat(val) || null;
+  row.customRate = parsed;
+  globalCustomRate = parsed;
+  calc(); updateDisplay();
 }
 
 function onTotalStakeInput(val) {
@@ -1142,6 +1105,7 @@ function resetAll() {
   numOut = 2; forkType = "1-2";
   rows = [makeRow(1), makeRow(2)];
   nextId = 3; roundValue = 0; roundUseFx = false; totalStakeOverride = null;
+  globalCustomRate = null;
   document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
   buildForkSelect();
   showComm = false;
