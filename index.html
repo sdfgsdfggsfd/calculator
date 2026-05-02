@@ -470,7 +470,7 @@ function calcEffOdds(raw, commPct, betType, usePoly, catKey) {
   const { feeRate, exponent } = POLY_CATS[catKey];
   if (!feeRate) return eff;
   const p = 1 / eff;
-  const adjEff = 1 / (p * (1 + feeRate * Math.pow(p * (1 - p), exponent)));
+  const adjEff = 1 / (p * (1 + feeRate * Math.pow(1 - p, exponent)));
   return adjEff > 1 ? adjEff : null;
 }
 
@@ -482,7 +482,7 @@ function takerFeePct(raw, commPct, catKey) {
   const { feeRate, exponent } = POLY_CATS[catKey];
   if (!feeRate) return 0;
   const p = 1 / eff;
-  return feeRate * Math.pow(p * (1 - p), exponent) * 100;
+  return feeRate * Math.pow(1 - p, exponent) * 100;
 }
 
 function f2(n, maxDec = 2) {
