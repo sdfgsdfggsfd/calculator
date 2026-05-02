@@ -787,6 +787,7 @@ function buildTable() {
           </div>
           ${liabHtml}
           <div id="brl-hint-${row.id}" class="dim" style="padding-left:2px;display:none"></div>
+          <div id="shares-hint-${row.id}" style="padding-left:2px;display:none;font:500 10px/1 'JetBrains Mono',monospace;color:var(--poly)"></div>
         </div>
       </td>
       <td class="ctr-col" id="fixcell-${row.id}">
@@ -861,7 +862,19 @@ function updateDisplay() {
       brlHint.style.display = "none";
     }
 
-    // Liability update (for lay rows)
+    // Shares hint for Polymarket rows
+    const sharesHint = document.getElementById(`shares-hint-${row.id}`);
+    if (sharesHint) {
+      const rawOdds = parseFloat(row.odds) || 0;
+      if (row.betType !== "lay" && row.usePoly && rawOdds > 1) {
+        const price  = 1 / rawOdds;          // e.g. 0.78 for 78c
+        const shares = result.stakesUSD[i] / price;
+        sharesHint.textContent = `${shares.toFixed(2)} shares`;
+        sharesHint.style.display = "";
+      } else {
+        sharesHint.style.display = "none";
+      }
+    }
     if (row.betType === "lay") {
       const raw  = parseFloat(row.odds) || 0;
       const s    = result.stakesUSD[i];
