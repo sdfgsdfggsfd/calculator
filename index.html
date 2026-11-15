@@ -1,372 +1,324 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="format-detection" content="telephone=no">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
 <link rel="icon" href="logo.png" type="image/png">
 <title>Surebet Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; }
+  * { margin: 0; }
 
-  /* ═══════════════════════════════════════════
-     DESIGN TOKENS
-  ═══════════════════════════════════════════ */
+  /* ── Tokens ─────────────────────────────────────────── */
   :root {
-    --bg:          #060b16;
-    --surface:     #0b1324;
-    --surface2:    #0f1b30;
-    --surface3:    #14213a;
-    --border:      #1a2d46;
-    --border-soft: #112035;
-    --text:        #cdd9ef;
-    --text2:       #4d6882;
-    --text3:       #283a50;
-    --cyan:        #22d3ee;
-    --cyan-dim:    rgba(34,211,238,.09);
-    --cyan-glow:   rgba(34,211,238,.18);
-    --green:       #10b981;
-    --green-bright:#34d399;
-    --green-bg:    rgba(16,185,129,.07);
-    --green-border:rgba(16,185,129,.22);
-    --green-glow:  rgba(16,185,129,.25);
-    --red:         #f43f5e;
-    --red-bg:      rgba(244,63,94,.07);
-    --red-border:  rgba(244,63,94,.22);
-    --red-glow:    rgba(244,63,94,.2);
-    --amber:       #f59e0b;
-    --amber-bg:    rgba(245,158,11,.08);
-    --amber-border:rgba(245,158,11,.28);
-    --poly:        #a78bfa;
-    --poly-bg:     rgba(167,139,250,.07);
-    --poly-border: rgba(167,139,250,.18);
-    --poly-glow:   rgba(167,139,250,.15);
-    --fix:         #fb923c;
-    --fix-bg:      rgba(251,146,60,.08);
-    --fix-border:  rgba(251,146,60,.28);
-    --lay:         #f472b6;
-    --lay-bg:      rgba(244,114,182,.08);
-    --lay-border:  rgba(244,114,182,.28);
-    --lay-glow:    rgba(244,114,182,.15);
-    --tfoot-bg:    #07101e;
-    --inp-ro:      rgba(255,255,255,.04);
-    --row-hover:   rgba(255,255,255,.018);
-    --r:    10px;
-    --r-sm: 6px;
-    --r-xs: 4px;
+    --bg:      #0c0e0c;
+    --panel:   #131612;
+    --panel-2: #191d18;
+    --rule:    #2a2f29;
+    --rule-2:  #1e231d;
+    --ink:     #ece9de;
+    --ink-2:   #9ba292;
+    --ink-3:   #6a7265;
+    --profit:  #7fe0a6;
+    --loss:    #ff7b68;
+    --fix:     #f2b45c;
+    --poly:    #b3a5ff;
+    --lay:     #6cb8ff;
+    --sans: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  [data-theme="light"] {
+    --bg:      #f1efe6;
+    --panel:   #fbfaf5;
+    --panel-2: #ebe9df;
+    --rule:    #d2cfc1;
+    --rule-2:  #e3e0d4;
+    --ink:     #1a1d18;
+    --ink-2:   #566051;
+    --ink-3:   #7e8575;
+    --profit:  #13744a;
+    --loss:    #bf3820;
+    --fix:     #9a5f00;
+    --poly:    #5a3fd0;
+    --lay:     #1c63ab;
+    color-scheme: light;
   }
 
-  .light {
-    --bg:           #edf1fa;
-    --surface:      #ffffff;
-    --surface2:     #e2ecf8;
-    --surface3:     #d5e4f5;
-    --border:       #bfd0e8;
-    --border-soft:  #cdddf2;
-    --text:         #0c1929;
-    --text2:        #3d5e80;
-    --text3:        #7a9ab8;
-    --cyan:         #0891b2;
-    --cyan-dim:     rgba(8,145,178,.08);
-    --cyan-glow:    rgba(8,145,178,.15);
-    --green:        #059669;
-    --green-bright: #0d9f72;
-    --green-bg:     rgba(5,150,105,.07);
-    --green-border: rgba(5,150,105,.25);
-    --green-glow:   rgba(5,150,105,.18);
-    --red:          #dc2250;
-    --red-bg:       rgba(220,34,80,.06);
-    --red-border:   rgba(220,34,80,.22);
-    --red-glow:     rgba(220,34,80,.15);
-    --amber-bg:     rgba(217,119,6,.08);
-    --amber-border: rgba(217,119,6,.3);
-    --poly:         #6d28d9;
-    --poly-bg:      rgba(109,40,217,.07);
-    --poly-border:  rgba(109,40,217,.2);
-    --lay:          #db2777;
-    --lay-bg:       rgba(219,39,119,.07);
-    --lay-border:   rgba(219,39,119,.25);
-    --fix-bg:       rgba(234,88,12,.07);
-    --fix-border:   rgba(234,88,12,.28);
-    --tfoot-bg:     #d8e8f8;
-    --inp-ro:       rgba(0,0,0,.04);
-    --row-hover:    rgba(79,70,229,.03);
-  }
-
+  /* ── Base ───────────────────────────────────────────── */
+  html, body { height: 100%; }
   body {
-    font-family: var(--sans,'DM Sans',sans-serif);
-    font-size: 13px;
-    color: var(--text);
     background: var(--bg);
-    min-height: 100vh;
-    padding: 22px 14px 56px;
-    line-height: 1.5;
-    transition: background .28s, color .28s;
+    color: var(--ink);
+    font: 400 14px/1.45 var(--sans);
+    display: flex; flex-direction: column;
+    -webkit-font-smoothing: antialiased;
   }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 65% 45% at 95%  0%, rgba(34,211,238,.055) 0%, transparent 55%),
-      radial-gradient(ellipse 55% 50% at  0% 100%, rgba(167,139,250,.04) 0%, transparent 55%);
-    pointer-events: none; z-index: 0;
-  }
-  .wrap { max-width: 1280px; margin: 0 auto; position: relative; z-index: 1; }
+  .page { flex: 1; width: 100%; max-width: 1180px; margin: 0 auto; padding: 28px 16px 24px; }
+  .muted { color: var(--ink-3); font-size: 12px; }
+  button, select, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:disabled, select:disabled, input:disabled { cursor: not-allowed; opacity: .4; }
+  :focus-visible { outline: 2px solid var(--fix); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
 
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
+  /* ── Masthead: the locked profit is the hero ────────── */
+  .masthead {
+    display: grid; grid-template-columns: 1fr auto; gap: 28px; align-items: end;
+    padding-bottom: 22px; border-bottom: 1px solid var(--rule);
   }
-  .wrap > * { animation: fadeUp .4s cubic-bezier(.22,1,.36,1) both; }
-  .wrap > *:nth-child(1) { animation-delay: .00s; }
-  .wrap > *:nth-child(2) { animation-delay: .06s; }
-  .wrap > *:nth-child(3) { animation-delay: .10s; }
-  .wrap > *:nth-child(4) { animation-delay: .14s; }
-  .wrap > *:nth-child(5) { animation-delay: .18s; }
+  .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+  .brand img { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+  .brand h1 { font: 800 30px/1 var(--sans); letter-spacing: -.025em; }
+  .brand p { margin-top: 6px; color: var(--ink-2); font-size: 14px; max-width: 42ch; }
 
-  /* ─── HEADER ─── */
-  .hdr {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    padding: 14px 20px;
-    margin-bottom: 20px;
-    position: relative; z-index: 1;
+  .hero-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 14px; }
+  .status {
+    font: 600 13px/1 var(--sans); padding: 7px 12px; border-radius: 999px;
+    border: 1px solid var(--rule); color: var(--ink-2);
   }
-  .hdr-brand { flex-shrink: 0; }
-  .hdr-center { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; position: absolute; left: 50%; transform: translateX(-50%); }
-  .hdr-right  { flex-shrink: 0; }
+  .status[data-state="arb"]  { color: var(--profit); border-color: color-mix(in oklab, var(--profit) 45%, transparent); }
+  .status[data-state="none"] { color: var(--loss);   border-color: color-mix(in oklab, var(--loss) 45%, transparent); }
 
-  .theme-btn {
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text2); border-radius: var(--r-sm); padding: 8px 14px;
-    cursor: pointer; font: 500 12px/1 'DM Sans',sans-serif;
-    transition: border-color .15s, color .15s; white-space: nowrap; align-self: center;
-  }
-  .theme-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .hero { display: flex; align-items: stretch; }
+  .stat { padding: 0 24px; border-left: 1px solid var(--rule); }
+  .stat:first-child { border-left: 0; padding-left: 0; }
+  .stat:last-child { padding-right: 0; }
+  .stat dt { font: 500 13px/1 var(--sans); color: var(--ink-3); }
+  .stat dd { margin-top: 10px; font: 600 26px/1 var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .stat.roi dd { font-size: 44px; letter-spacing: -.03em; }
+  .stat small { display: block; margin-top: 6px; font: 400 12px/1 var(--mono); color: var(--ink-3); }
+  .hero[data-state="arb"] .roi dd { color: var(--profit); }
 
-  /* ticker CSS removed – backend-only */
+  /* ── Toolbar ────────────────────────────────────────── */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 12px 26px; align-items: center;
+    padding: 16px 0; border-bottom: 1px solid var(--rule);
+  }
+  .field { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .lbl { font: 500 13px var(--sans); color: var(--ink-2); }
+  .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    background: transparent; border: 0; border-left: 1px solid var(--rule);
+    padding: 7px 13px; font: 500 13px var(--mono); color: var(--ink-2);
+  }
+  .seg button:first-child { border-left: 0; }
+  .seg button:hover { color: var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 
-  /* ─── CONTROLS ─── */
-  .controls {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); padding: 11px 16px; margin-bottom: 12px;
-    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+  .input {
+    background: var(--panel); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 7px 10px; font: 500 13px var(--mono); color: var(--ink);
+    min-width: 0; transition: border-color .12s;
   }
-  .ctrl-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .ctrl-label {
-    font: 600 10px/1 'DM Sans',sans-serif; color: var(--text2);
-    text-transform: uppercase; letter-spacing: .08em; white-space: nowrap;
-  }
-  .ctrl-sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+  .input:hover { border-color: var(--ink-3); }
+  .input:focus { outline: none; border-color: var(--fix); }
+  .input:focus-visible { outline: 2px solid var(--fix); outline-offset: 1px; }
+  .input.num-in { text-align: right; }
+  .w-sm { width: 84px; }
+  .w-md { width: 112px; }
+  .w-odds { width: 96px; text-align: center; }
+  .w-stake { width: 128px; text-align: right; }
+  select.input { font-family: var(--sans); font-size: 13px; padding-right: 8px; }
 
   .btn {
-    background: var(--surface2); border: 1px solid var(--border);
-    color: var(--text2); border-radius: var(--r-sm); padding: 5px 11px;
-    cursor: pointer; font: 500 12px/1 'DM Sans',sans-serif;
-    transition: border-color .13s, color .13s, background .13s; white-space: nowrap;
+    background: transparent; border: 1px solid var(--rule); border-radius: 8px;
+    padding: 9px 14px; font: 600 13px/1 var(--sans); color: var(--ink);
+    transition: border-color .12s, background .12s;
   }
-  .btn:hover { border-color: var(--text2); color: var(--text); }
-  .btn.on { background: var(--cyan-dim); border-color: rgba(34,211,238,.35); color: var(--cyan); }
+  .btn:hover { border-color: var(--ink-3); }
+  .btn[aria-pressed="true"] { border-color: var(--ink); background: var(--panel-2); }
+  .btn.solid { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .btn.solid:hover { opacity: .88; }
+  .link {
+    background: none; border: 0; padding: 0; color: var(--fix);
+    font: 600 12px var(--sans); text-decoration: underline; text-underline-offset: 3px;
+  }
 
-  /* fork-type select in controls */
-  .fork-select {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--r-sm); padding: 4px 8px;
-    font: 500 12px/1 'JetBrains Mono',monospace; color: var(--text);
-    cursor: pointer; transition: border-color .13s;
+  .warn {
+    margin-top: 12px; padding: 9px 12px; border-radius: 8px;
+    border: 1px solid color-mix(in oklab, var(--fix) 45%, transparent);
+    color: var(--fix); font-size: 13px;
   }
-  .fork-select:focus { outline: none; border-color: var(--cyan); }
 
-  /* ─── TABLE ─── */
-  .tbl-wrap {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--r); overflow: auto; margin-bottom: 12px;
+  /* ── Ledger table ───────────────────────────────────── */
+  .grid-wrap {
+    margin-top: 18px; background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 12px; overflow-x: auto;
   }
-  table { border-collapse: collapse; width: 100%; }
+  table { width: 100%; min-width: 980px; border-collapse: collapse; }
   th {
-    padding: 9px 10px; background: var(--surface2);
-    font: 600 10px/1 'DM Sans',sans-serif; color: var(--text2);
-    text-transform: uppercase; letter-spacing: .07em;
-    border-bottom: 1px solid var(--border); white-space: nowrap;
+    text-align: left; padding: 13px 10px; font: 500 13px/1.2 var(--sans); color: var(--ink-3);
+    border-bottom: 1px solid var(--rule); white-space: nowrap;
   }
-  th.poly-th { background: var(--poly-bg); color: var(--poly); border-bottom-color: var(--poly-border); }
-  th.lay-th  { background: var(--lay-bg);  color: var(--lay);  border-bottom-color: var(--lay-border);  }
-  td {
-    border-bottom: 1px solid var(--border-soft);
-    padding: 7px 10px; vertical-align: middle;
+  th.poly { color: var(--poly); }
+  td { padding: 10px; border-bottom: 1px solid var(--rule-2); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: color-mix(in oklab, var(--ink) 2.5%, transparent); }
+  tr.is-lay > td:first-child { box-shadow: inset 3px 0 0 var(--lay); }
+  .c   { text-align: center; }
+  .r   { text-align: right; }
+  .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .poly-col { color: var(--poly); }
+  .idx { font: 500 12px var(--mono); color: var(--ink-3); }
+
+  .side {
+    width: 66px; padding: 7px 0; border-radius: 6px; background: transparent;
+    font: 700 12px/1 var(--sans); border: 1px solid var(--rule);
   }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr { transition: background .1s; }
-  tbody tr:hover td { background: var(--row-hover); }
-  td.poly-td { background: var(--poly-bg); }
-  tbody tr:hover td.poly-td { background: rgba(167,139,250,.13); }
-  tr.is-lay td { background: rgba(244,114,182,.025); }
-  tbody tr.is-lay:hover td { background: rgba(244,114,182,.06); }
-  tr.is-lay td.poly-td { background: rgba(167,139,250,.06); }
+  .side.back { color: var(--profit); border-color: color-mix(in oklab, var(--profit) 40%, transparent); }
+  .side.lay  { color: var(--lay);    border-color: color-mix(in oklab, var(--lay) 45%, transparent); }
+  .side:hover { background: var(--panel-2); }
 
-  .num-col { text-align: right; font-family: 'JetBrains Mono',monospace; }
-  .ctr-col { text-align: center; }
-
-  input[type=number] {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--r-sm); padding: 5px 8px;
-    font: 400 12.5px/1 'JetBrains Mono',monospace; color: var(--text);
-    transition: border-color .15s, box-shadow .15s; -moz-appearance: textfield;
+  .cur {
+    padding: 6px 8px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--rule);
+    font: 600 12px/1 var(--mono); color: var(--ink-2); min-width: 74px;
   }
-  input[type=number]::-webkit-outer-spin-button,
-  input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  input[type=number]:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.08); }
-  input[type=number][readonly] { background: var(--inp-ro); cursor: default; font-weight: 700; }
+  .cur:hover { color: var(--ink); border-color: var(--ink-3); }
 
-  select {
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: var(--r-sm); padding: 4px 7px;
-    font: 400 11.5px/1 'DM Sans',sans-serif; color: var(--text);
-    cursor: pointer; transition: border-color .13s;
+  .lock {
+    padding: 6px 9px; border-radius: 6px; background: transparent; border: 1px solid var(--rule);
+    font: 600 12px/1 var(--sans); color: var(--ink-2); min-width: 62px;
   }
-  select:focus { outline: none; border-color: var(--poly); }
-  select:disabled { opacity: .3; cursor: not-allowed; }
+  .lock:hover { border-color: var(--fix); color: var(--fix); }
+  .lock[aria-pressed="true"] { background: color-mix(in oklab, var(--fix) 14%, transparent); border-color: var(--fix); color: var(--fix); }
 
-  input[type=checkbox] { width: 14px; height: 14px; cursor: pointer; accent-color: var(--poly); }
+  .stake-cell { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .stake-in.locked { border-color: var(--fix); color: var(--fix); }
+  .hint { font: 400 11px/1.3 var(--mono); color: var(--ink-3); white-space: nowrap; }
+  .hint.lay { color: var(--lay); }
+  .pos { color: var(--profit); font-weight: 600; }
+  .neg { color: var(--loss);   font-weight: 600; }
 
-  /* currency pill */
-  .cur-btn {
-    border-radius: 20px; padding: 3px 9px; font-size: 11px;
-    cursor: pointer; transition: all .13s;
-    background: var(--surface3); border: 1px solid var(--border);
-    color: var(--text2); font-family: 'JetBrains Mono',monospace; font-weight: 600;
+  tfoot td { background: var(--panel-2); border-top: 1px solid var(--rule); border-bottom: 0; padding: 12px 10px; }
+  tfoot .lab { font: 500 13px var(--sans); color: var(--ink-2); }
+
+  /* ── Actions & footer ───────────────────────────────── */
+  .actions {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    gap: 12px; margin-top: 18px;
   }
-  .cur-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-
-  /* back/lay toggle */
-  .bl-btn {
-    border-radius: var(--r-sm); padding: 3px 9px;
-    font: 700 13px/1 'JetBrains Mono',monospace;
-    cursor: pointer; transition: all .13s; border: 1px solid;
-    min-width: 32px; text-align: center;
+  .actions .group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .foot {
+    border-top: 1px solid var(--rule); padding: 16px; text-align: center;
+    color: var(--ink-3); font-size: 12px;
   }
-  .bl-btn.back { background: var(--green-bg); border-color: var(--green-border); color: var(--green-bright); }
-  .bl-btn.back:hover { background: rgba(16,185,129,.15); border-color: var(--green); }
-  .bl-btn.lay  { background: var(--lay-bg);   border-color: var(--lay-border);   color: var(--lay); }
-  .bl-btn.lay:hover  { background: rgba(244,114,182,.15); border-color: var(--lay); }
+  .foot a { color: var(--ink-2); text-decoration: none; font-weight: 600; }
+  .foot a:hover { color: var(--ink); }
 
-  /* fix button */
-  .fix-btn {
-    background: none; border: 1px solid var(--border);
-    color: var(--text3); font-size: 13px;
-    border-radius: var(--r-xs); padding: 3px 8px; cursor: pointer; transition: all .13s;
+  /* ── Small screens: ledger rows become cards ────────── */
+  @media (max-width: 860px) {
+    .masthead { grid-template-columns: 1fr; gap: 18px; }
+    .hero-wrap { align-items: stretch; }
+    .hero { justify-content: space-between; }
+    .stat { padding: 0 14px; }
+    .stat:first-child { padding-left: 0; }
+    .stat:last-child { padding-right: 0; }
+    .stat dd { font-size: 19px; }
+    .stat.roi dd { font-size: 30px; }
+    .toolbar { gap: 12px 16px; }
+
+    .grid-wrap { overflow: visible; background: none; border: 0; }
+    table, tbody, tfoot { display: block; min-width: 0; }
+    thead { display: none; }
+    tbody tr {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px;
+      background: var(--panel); border: 1px solid var(--rule); border-radius: 12px;
+      padding: 14px; margin-bottom: 12px; position: relative;
+    }
+    tbody tr:hover td { background: none; }
+    tr.is-lay { border-left: 3px solid var(--lay); }
+    tr.is-lay > td:first-child { box-shadow: none; }
+    td {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+      padding: 0; border: 0; text-align: left !important; min-width: 0;
+    }
+    td::before {
+      content: attr(data-label); font: 500 12px var(--sans); color: var(--ink-3);
+    }
+    td.idx-cell { position: absolute; top: 12px; right: 14px; flex-direction: row; }
+    td.idx-cell::before { content: none; }
+    td.span2 { grid-column: 1 / -1; }
+    td input.input, td select.input { width: 100%; }
+    td .hint { white-space: normal; }
+    .stake-cell { align-items: stretch; width: 100%; }
+    .stake-cell .w-stake { width: 100%; text-align: right; }
+    .stake-cell .hint { text-align: right; }
+
+    tfoot tr {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;
+      background: var(--panel-2); border: 1px solid var(--rule); border-radius: 12px; padding: 14px;
+    }
+    tfoot td { display: block; background: none; border: 0; padding: 0; }
+    tfoot td:empty { display: none; }
+    tfoot td[colspan] { width: 100%; }
   }
-  .fix-btn:hover { border-color: var(--fix); }
-  .fix-btn.fix-on { background: var(--fix-bg); border-color: var(--fix-border); color: var(--fix); }
-  .stake-fixed { background: var(--fix-bg) !important; border-color: var(--fix-border) !important; color: var(--fix) !important; font-weight: 700; }
-
-  /* liability badge */
-  .liab-badge {
-    font: 400 10px/1 'JetBrains Mono',monospace; color: var(--lay); margin-top: 3px;
-    background: var(--lay-bg); border: 1px solid var(--lay-border);
-    border-radius: var(--r-xs); padding: 2px 7px; display: inline-block;
-  }
-
-  /* tfoot */
-  tfoot td {
-    background: var(--tfoot-bg); border-top: 1px solid var(--border);
-    border-bottom: none; padding: 9px 10px;
-  }
-
-  .pos  { color: var(--green-bright); font: 700 13px/1 'JetBrains Mono',monospace; }
-  .neg  { color: var(--red);          font: 700 13px/1 'JetBrains Mono',monospace; }
-  .dim  { font: 400 10px/1 'JetBrains Mono',monospace; color: var(--text3); }
-
-  .fee-badge {
-    display: inline-block; background: var(--poly-bg); border: 1px solid var(--poly-border);
-    color: var(--poly); font: 600 10px/1 'JetBrains Mono',monospace;
-    padding: 2px 8px; border-radius: 20px; letter-spacing: .02em;
-  }
-
-  /* ─── ACTIONS ─── */
-  .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .actions .btn { padding: 8px 18px; font-size: 12.5px; }
-  .actions .btn.primary { background: var(--cyan-dim); border-color: rgba(34,211,238,.3); color: var(--cyan); }
-  .actions .btn.primary:hover { background: rgba(34,211,238,.14); border-color: var(--cyan); }
-
-  /* ─── ROI BADGE ─── */
-  .roi-badge {
-    font: 700 15px/1 'JetBrains Mono', monospace;
-    padding: 6px 14px; border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--text3);
-    transition: all .2s;
-    white-space: nowrap; align-self: center;
-  }
-  .roi-badge.arb     { background: var(--green-bg); border-color: var(--green-border); color: var(--green-bright); box-shadow: 0 0 14px var(--green-glow); }
-  .roi-badge.noarb   { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
-  .roi-badge.neutral { background: var(--surface2); border-color: var(--border);        color: var(--text2); }
-
-  /* ─── SITE FOOTER ─── */
-  .site-footer {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: var(--surface); border-top: 1px solid var(--border);
-    padding: 10px 20px;
-    text-align: center;
-    font: 400 12px/1 'DM Sans', sans-serif;
-    color: var(--text3);
-  }
-  .site-footer a {
-    color: var(--cyan); text-decoration: none; font-weight: 600;
-    transition: opacity .15s;
-  }
-  .site-footer a:hover { opacity: .75; }
-
-  .warn-bar { background: var(--amber-bg); border: 1px solid var(--amber-border); color: var(--amber); border-radius: var(--r-sm); padding: 5px 12px; font-size: 12px; }
-
-  /* ─── RESPONSIVE ─── */
-  @media (max-width: 640px) {
-    .hdr-brand h1 { font-size: 24px; }
-    .hdr { flex-direction: column; }
-    .ticker-wrap { width: 100%; }
-    .ticker { min-width: unset; flex: 1; }
-    .cards { grid-template-columns: repeat(2, 1fr); }
-    .controls { gap: 10px; }
+  @media (max-width: 560px) {
+    .masthead { padding-bottom: 16px; }
+    .brand h1 { font-size: 24px; }
+    .brand p { font-size: 13px; }
+    .stat dd { font-size: 17px; }
+    .stat.roi dd { font-size: 26px; }
+    .stat dt { font-size: 12px; }
+    .stat small { font-size: 11px; }
+    .stat { padding: 0 10px; }
+    .toolbar .field { width: 100%; }
+    .toolbar .field > .btn { width: 100%; }
+    .w-md { width: 100%; }
+    .actions .group { width: 100%; }
+    .actions .btn { flex: 1; }
   }
 </style>
 </head>
 <body>
+<div class="page">
 
-<!-- ── HEADER (full-width, outside wrap) ── -->
-<div class="hdr">
-  <div class="hdr-brand">
-    <img src="logo.png" alt="Logo" style="height:64px;width:auto;display:block;">
-  </div>
-  <div class="hdr-right">
-    <div id="roi-badge" class="roi-badge" style="display:none">—</div>
-  </div>
-</div>
-
-<div class="wrap">
-
-  <!-- ── CONTROLS ── -->
-  <div class="controls">
-    <div class="ctrl-group">
-      <span class="ctrl-label">Outcomes</span>
-      <div id="outcome-btns" style="display:flex;gap:5px"></div>
+  <header class="masthead">
+    <div class="brand">
+      <img src="logo.png" alt="" width="44" height="44">
+      <div>
+        <h1>Surebet calculator</h1>
+        <p>Stakes that lock the same profit whichever outcome lands.</p>
+      </div>
     </div>
-    <div class="ctrl-sep"></div>
-    <div class="ctrl-group">
-      <span class="ctrl-label">Type</span>
-      <select class="fork-select" id="fork-type" onchange="onForkChange()"></select>
+
+    <div class="hero-wrap">
+      <div class="status" id="status" data-state="idle" role="status" aria-live="polite">Enter odds to start</div>
+      <dl class="hero" id="hero">
+        <div class="stat roi"><dt>ROI</dt><dd id="roi">—</dd></div>
+        <div class="stat"><dt>Guaranteed profit</dt><dd id="profit">—</dd><small id="profit-sub"></small></div>
+        <div class="stat"><dt>Total stake</dt><dd id="total">—</dd></div>
+      </dl>
     </div>
-    <div class="ctrl-sep"></div>
-    <button class="btn" id="show-comm-btn" onclick="toggleShowComm()">Show commissions</button>
+  </header>
 
-    <div id="brl-warn" style="display:none" class="warn-bar">⚠ BRL rows need live rate</div>
-  </div>
+  <section class="toolbar" aria-label="Market settings">
+    <div class="field">
+      <span class="lbl" id="outs-lbl">Outcomes</span>
+      <div class="seg" id="outs" role="group" aria-labelledby="outs-lbl"></div>
+    </div>
+    <div class="field">
+      <label class="lbl" for="fork">Market</label>
+      <select class="input" id="fork" data-key="fork"></select>
+    </div>
+    <div class="field">
+      <button class="btn" id="comm" type="button" data-act="comm" aria-pressed="false">Commissions</button>
+    </div>
+    <div class="field">
+      <label class="lbl" for="rate">BRL per USD</label>
+      <input class="input w-md" id="rate" data-key="rate" data-in="rate" type="text" inputmode="decimal" placeholder="loading…" autocomplete="off">
+      <span class="muted" id="rate-src"></span>
+      <button class="link" id="rate-live" data-act="rate-live" type="button" hidden>Use live rate</button>
+    </div>
+  </section>
 
-  <!-- ── TABLE ── -->
-  <div class="tbl-wrap">
+  <p class="warn" id="warn" hidden></p>
+
+  <div class="grid-wrap">
     <table>
       <thead id="thead"></thead>
       <tbody id="tbody"></tbody>
@@ -374,776 +326,671 @@
     </table>
   </div>
 
-  <!-- ── ACTIONS ── -->
   <div class="actions">
-    <button class="btn primary" onclick="shareOdds()" id="copy-btn">🔗 Share odds</button>
-    <button class="btn primary" id="theme-btn" onclick="toggleTheme()">☀️ Light</button>
-    <button class="btn" onclick="resetAll()">Reset all</button>
+    <div class="group">
+      <button class="btn" type="button" data-act="reset">Reset</button>
+    </div>
+    <div class="group">
+      <button class="btn" id="theme" type="button" data-act="theme">Light theme</button>
+      <button class="btn solid" id="share" type="button" data-act="share">Share odds</button>
+    </div>
   </div>
 
 </div>
 
-<footer class="site-footer">est @ 2026 by <a href="https://x.com/juronegativo" target="_blank" rel="noopener">nagato</a></footer>
+<footer class="foot">© 2026 · built by <a href="https://x.com/juronegativo" target="_blank" rel="noopener">nagato</a></footer>
 
 <script>
-// ====================== CONFIG ======================
-const POLY_CATS = {
-  "None (free)":   { feeRate: 0,     exponent: 0   },
-  "Crypto":        { feeRate: 0.072, exponent: 1   },
-  "Sports":        { feeRate: 0.03,  exponent: 1   },
-  "Finance":       { feeRate: 0.04,  exponent: 1   },
-  "Politics":      { feeRate: 0.04,  exponent: 1   },
-  "Tech":          { feeRate: 0.04,  exponent: 1   },
-  "Culture":       { feeRate: 0.05,  exponent: 1   },
-  "Economics":     { feeRate: 0.03,  exponent: 0.5 },
-  "Weather":       { feeRate: 0.025, exponent: 0.5 },
-  "Other/General": { feeRate: 0.2,   exponent: 2   },
-  "Mentions":      { feeRate: 0.25,  exponent: 2   },
-  "Geopolitical":  { feeRate: 0,     exponent: 0   },
+// ═══════════════════════════════════════════════════════
+//  POLYMARKET TAKER FEES
+//  Source: docs.polymarket.com/trading/fees
+//  fee = C × feeRate × p × (1 − p)   (C = shares, p = price)
+//  Per the Market Details schedule the exponent is 1.
+//  Makers pay no fee. Geopolitics markets are fee-free.
+// ═══════════════════════════════════════════════════════
+const POLY = {
+  "Crypto":          0.07,
+  "Sports":          0.05,
+  "Economics":       0.05,
+  "Culture":         0.05,
+  "Weather":         0.05,
+  "Other / General": 0.05,
+  "Finance":         0.04,
+  "Politics":        0.04,
+  "Mentions":        0.04,
+  "Tech":            0.04,
+  "Geopolitics":     0,
 };
-const CAT_KEYS = Object.keys(POLY_CATS);
+const CATS = Object.keys(POLY);
 
-// Fork/formula types — label, minOutcomes
-const FORK_TYPES_2 = [
-  { id:"1-2",   label:"1 — 2",        hint:"Home vs Away" },
-  { id:"1-X2",  label:"1 — X2",       hint:"Back Home / Lay X2" },
-  { id:"1X-2",  label:"1X — 2",       hint:"Lay Home / Back Away" },
-  { id:"AH",    label:"AH1 — AH2",    hint:"Asian Handicap" },
-  { id:"OU",    label:"Over — Under",  hint:"Goals market" },
-];
-const FORK_TYPES_3 = [
-  { id:"1-X-2",    label:"1 — X — 2",       hint:"3-way standard" },
-  { id:"3corr",    label:"3 corners",        hint:"Corners market" },
-  { id:"DNB+D",    label:"DNB + Draw",       hint:"Draw No Bet + Draw" },
-];
-const FORK_TYPES_N = [
-  { id:"multi",    label:"Multi-way",        hint:"4+ outcomes" },
-];
+const FORKS = {
+  2: [
+    { id: "1-2",  label: "1 — 2" },
+    { id: "1-X2", label: "1 — X2" },
+    { id: "1X-2", label: "1X — 2" },
+    { id: "AH",   label: "AH1 — AH2" },
+    { id: "OU",   label: "Over — Under" },
+  ],
+  3: [
+    { id: "1-X-2",  label: "1 — X — 2" },
+    { id: "3corr",  label: "3 corners" },
+    { id: "DNB+D",  label: "DNB + Draw" },
+  ],
+  N: [{ id: "multi", label: "Multi-way" }],
+};
+const forksFor = n => n === 2 ? FORKS[2] : n === 3 ? FORKS[3] : FORKS.N;
 
-const CURR_SYMS = { USD:"$", BRL:"R$" };
+// ═══════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  n: 2,
+  fork: "1-2",
+  showComm: false,
+  rows: [],
+  nextId: 1,
+  total: null,      // USD total stake override (null = 100)
+  totalRaw: "",     // what the user typed in the total box
+  customRate: null, // user-typed BRL per USD (overrides live)
+  rateRaw: "",
+  liveRate: null,
+  liveSrc: "",
+};
 
-// ====================== STATE ======================
-let numOut     = 2;
-let showComm   = false;
-let roundValue = 0;
-let roundUseFx = false;
-let nextId     = 3;
-let rows       = [makeRow(1), makeRow(2)];
-let rates      = { USD: 1, BRL: null };
-let globalCustomRate = null;   // user-typed BRL/USD rate — overrides live rate everywhere
-let lastUpdated = null;
-let result      = null;
-let darkMode    = true;
-let forkType    = "1-2";
-let totalStakeOverride = null;
+function mk(id, odds = "2") {
+  return { id, odds, comm: "0", bt: "back", poly: false, cat: "Sports",
+           cur: "USD", fixed: false, fixedVal: "", manual: null };
+}
 
-function makeRow(id) {
+// ═══════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════
+const num   = v => { const n = parseFloat(String(v ?? "").replace(",", ".")); return Number.isFinite(n) ? n : NaN; };
+const clean = v => String(v ?? "").replace(/[^0-9.,]/g, "").slice(0, 12);
+const esc   = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = v => (v < -0.005 ? "−" : "") + Math.abs(v).toFixed(2);
+const signed = (v, s) => (v < -0.005 ? "−" : "+") + s + Math.abs(v).toFixed(2);
+const sym   = c => c === "BRL" ? "R$" : "$";
+const rate  = () => S.customRate ?? S.liveRate;
+
+// Convert a USD amount into the display currency (null if no rate for BRL)
+const toDisp = (usd, cur) => cur === "BRL" ? (rate() ? usd * rate() : null) : usd;
+// Convert a display amount into USD (BRL without a rate is taken as-is)
+const toUsd  = (v, cur)   => cur === "BRL" ? (rate() ? v / rate() : v) : v;
+
+function convertStr(str, from, to) {
+  const v = num(str);
+  if (!Number.isFinite(v)) return str;
+  const d = toDisp(toUsd(v, from), to);
+  return d === null ? str : d.toFixed(2);
+}
+
+// ═══════════════════════════════════════════════════════
+//  MATH
+// ═══════════════════════════════════════════════════════
+/**
+ * Each row is one outcome. Per unit of stake, a row's P&L is:
+ *
+ *   Back @ raw odds, commission c on winnings:
+ *     own outcome   → net − 1          (net = 1 + (eff − 1)(1 − c))
+ *     other outcome → −1
+ *     eff = 1 / (p(1 + f(1 − p)))      where p = 1/raw, f = Polymarket feeRate
+ *
+ *   Lay @ raw odds L, commission c on winnings:
+ *     own outcome   → −(L − 1)         (liability)
+ *     other outcome → 1 − c            (net winnings)
+ *
+ * Stakes are solved so that P&L is equal on every outcome:
+ *   A·x = G·1  plus one normalisation (total stake, or a locked stake).
+ */
+function legOf(r) {
+  const raw = num(r.odds);
+  if (!(raw > 1)) return null;
+  const c = (num(r.comm) || 0) / 100;
+
+  if (r.bt === "lay") {
+    return { lay: true, raw, c, own: -(raw - 1), other: 1 - c, net: null, cost: 1 / raw, price: 1 / raw };
+  }
+
+  const price = 1 / raw;
+  const fee   = r.poly ? (POLY[r.cat] ?? 0) : 0;
+  const cost  = price * (1 + fee * (1 - price));  // cash per $1 payout, incl. taker fee
+  const eff   = 1 / cost;
+  const net   = 1 + (eff - 1) * (1 - c);
+  if (!(net > 1)) return null;
+  return { lay: false, raw, c, own: net - 1, other: -1, net, cost, price, fee };
+}
+
+function solveLinear(M, N) {
+  // Gauss-Jordan with partial pivoting. M is N rows × (N+1) cols; last col is RHS.
+  for (let c = 0; c < N; c++) {
+    let p = c;
+    for (let r = c + 1; r < N; r++) if (Math.abs(M[r][c]) > Math.abs(M[p][c])) p = r;
+    if (Math.abs(M[p][c]) < 1e-12) return null;
+    [M[c], M[p]] = [M[p], M[c]];
+    const d = M[c][c];
+    for (let k = c; k <= N; k++) M[c][k] /= d;
+    for (let r = 0; r < N; r++) {
+      if (r === c || M[r][c] === 0) continue;
+      const f = M[r][c];
+      for (let k = c; k <= N; k++) M[r][k] -= f * M[c][k];
+    }
+  }
+  return M.map(r => r[N]);
+}
+
+function model() {
+  const n = S.rows.length;
+  const legs = S.rows.map(legOf);
+  if (legs.some(l => !l)) return { ok: false, legs, reason: "odds" };
+
+  // A[m][i] = P&L per unit stake of row i when outcome m happens
+  const A = Array.from({ length: n }, (_, m) => legs.map((l, i) => m === i ? l.own : l.other));
+
+  const fixIdx = S.rows.findIndex(r => r.fixed);
+  const N = n + 1;                       // unknowns: x_0..x_{n-1}, G
+  const M = Array.from({ length: N }, () => Array(N + 1).fill(0));
+  for (let m = 0; m < n; m++) {
+    for (let i = 0; i < n; i++) M[m][i] = A[m][i];
+    M[m][n] = -1;
+  }
+  if (fixIdx >= 0) {
+    const f = toUsd(num(S.rows[fixIdx].fixedVal), S.rows[fixIdx].cur);
+    if (!(f > 0)) return { ok: false, legs, reason: "lock" };
+    M[n][fixIdx] = 1;
+    M[n][N] = f;
+  } else {
+    for (let i = 0; i < n; i++) M[n][i] = 1;
+    M[n][N] = S.total ?? 100;
+  }
+
+  const z = solveLinear(M, N);
+  if (!z) return { ok: false, legs, reason: "singular" };
+  const x = z.slice(0, n);
+
+  // Manually typed stakes override the solved value for that row
+  S.rows.forEach((r, i) => {
+    if (i === fixIdx || r.manual === null) return;
+    const v = toUsd(num(r.manual), r.cur);
+    if (Number.isFinite(v)) x[i] = v;
+  });
+
+  const pnl   = A.map(row => row.reduce((s, a, i) => s + a * x[i], 0));
+  const total = x.reduce((a, b) => a + b, 0);
+  const minP  = Math.min(...pnl);
+  const valid = x.every(v => v >= -1e-9);
   return {
-    id, odds:"2", comm:"0",
-    betType:"back",     // "back" | "lay"
-    usePoly:false, cat:"Sports",
-    currency:"USD", isFixed:false, fixedStake:"",
-    manualStake: null,   // user-typed override when another row is the fixed anchor
-    customRate: null     // custom BRL/USD rate for display on USD rows
+    ok: true, legs, A, x, pnl, total, minP, valid,
+    roi: total > 0 ? (minP / total) * 100 : 0,
+    surebet: valid && minP > 0.005,
   };
 }
 
-// ====================== MATH ======================
-/**
- * Effective odds taking commission and bet type into account.
- *
- * Back bet: eff = 1 + (raw−1)×(1 − c%)  [commission on profit only]
- * Lay  bet: eff = raw − c%               [lay formula]
- * Then apply Polymarket taker fee on top (back only).
- */
-function calcEffOdds(raw, commPct, betType, usePoly, catKey) {
-  if (!raw || raw <= 1) return null;
-  const c = (parseFloat(commPct) || 0) / 100;
-  let eff;
-  if (betType === "lay") {
-    eff = raw - c;                          // lay formula
-  } else {
-    eff = 1 + (raw - 1) * (1 - c);         // back formula
+// ═══════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  const ae = document.activeElement;
+  const key = ae && ae.dataset ? ae.dataset.key : null;
+  const caret = key && typeof ae.selectionStart === "number" ? ae.selectionStart : null;
+
+  const md = model();
+  drawControls();
+  drawTable(md);
+  drawHero(md);
+  drawWarn();
+
+  if (key) {
+    const el = document.querySelector(`[data-key="${CSS.escape(key)}"]`);
+    if (el) {
+      el.focus({ preventScroll: true });
+      if (caret !== null && el.setSelectionRange) { try { el.setSelectionRange(caret, caret); } catch (_) {} }
+    }
   }
-  if (eff <= 1) return null;
-  if (!usePoly || betType === "lay") return eff;
-  const { feeRate, exponent } = POLY_CATS[catKey];
-  if (!feeRate) return eff;
-  const p = 1 / eff;
-  const adjEff = 1 / (p * (1 + feeRate * Math.pow(1 - p, exponent)));
-  return adjEff > 1 ? adjEff : null;
 }
 
-function takerFeePct(raw, commPct, catKey) {
-  if (raw <= 1) return 0;
-  const c = (parseFloat(commPct) || 0) / 100;
-  const eff = 1 + (raw - 1) * (1 - c);
-  if (eff <= 1) return 0;
-  const { feeRate, exponent } = POLY_CATS[catKey];
-  if (!feeRate) return 0;
-  const p = 1 / eff;
-  return feeRate * Math.pow(1 - p, exponent) * 100;
-}
-
-function f2(n, maxDec = 2) {
-  if (typeof n !== "number" || !isFinite(n)) return "—";
-  // For very small values show more decimals so nothing rounds to zero
-  if (Math.abs(n) > 0 && Math.abs(n) < 0.01) return n.toFixed(4);
-  if (Math.abs(n) > 0 && Math.abs(n) < 0.10) return n.toFixed(3);
-  return n.toFixed(maxDec);
-}
-
-function getRate() {
-  // When user has typed a custom rate, it freezes the live rate globally
-  return globalCustomRate !== null ? globalCustomRate : rates.BRL;
-}
-
-function toDisplay(usdAmt, currency) {
-  if (currency === "USD") return usdAmt;
-  if (currency === "BRL") { const r = getRate(); return r ? usdAmt * r : null; }
-  return null;
-}
-
-// ====================== THEME ======================
-function toggleTheme() {
-  darkMode = !darkMode;
-  document.body.classList.toggle("light", !darkMode);
-  document.getElementById("theme-btn").textContent = darkMode ? "☀️ Light" : "🌙 Dark";
-  localStorage.setItem("darkMode", darkMode);
-}
-
-// ====================== RATE FETCHER ======================
-async function fetchRates() {
-  const attempts = [
-    async () => {
-      const brlRes = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDCBRL",{cache:"no-store"}).then(r=>r.json());
-      const brl = parseFloat(brlRes.price);
-      return { brl, src:"Binance" };
-    },
-    async () => {
-      const d = await fetch("https://open.er-api.com/v6/latest/USD").then(r=>r.json());
-      return { brl: d.rates.BRL, src:"ExchangeRate-API" };
-    },
-    async () => {
-      const d = await fetch("https://api.frankfurter.app/latest?base=USD&symbols=BRL").then(r=>r.json());
-      return { brl: d.rates.BRL, src:"Frankfurter/ECB" };
-    },
-  ];
-
-  for (const fn of attempts) {
-    try {
-      const { brl, src } = await fn();
-      if (brl > 0) {
-        gotRates(brl, src); return;
-      }
-    } catch (_) {}
-  }
-
-  // Fallback: try existing USDT/BRL
-  try {
-    const d = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL",{cache:"no-store"}).then(r=>r.json());
-    const brl = parseFloat(d.price);
-    if (brl > 0) { gotRates(brl, "Binance USDT"); return; }
-  } catch (_) {}
-
-  // all sources failed silently – calc will show BRL rows as unavailable
-}
-
-function gotRates(brl, source) {
-  rates.BRL = brl;
-  lastUpdated = new Date();
-
-  calc(); updateDisplay();
-}
-
-// ====================== FORK TYPE ======================
-function buildForkSelect() {
-  const sel = document.getElementById("fork-type");
-  const types = numOut === 2 ? FORK_TYPES_2 : numOut === 3 ? FORK_TYPES_3 : FORK_TYPES_N;
-  sel.innerHTML = types.map(t =>
-    `<option value="${t.id}"${forkType===t.id?" selected":""}>${t.label}</option>`
+function drawControls() {
+  const outs = document.getElementById("outs");
+  outs.innerHTML = [2, 3, 4, 5, 6].map(n =>
+    `<button type="button" data-act="n" data-n="${n}" aria-pressed="${n === S.n}" aria-label="${n} outcomes">${n}</button>`
   ).join("");
-  // default fork
-  if (!types.find(t=>t.id===forkType)) {
-    forkType = types[0].id;
-    sel.value = forkType;
+
+  const fk = document.getElementById("fork");
+  const opts = forksFor(S.n);
+  const sig = opts.map(o => o.id).join("|");
+  if (fk.dataset.sig !== sig) {
+    fk.innerHTML = opts.map(o => `<option value="${o.id}">${o.label}</option>`).join("");
+    fk.dataset.sig = sig;
   }
+  fk.value = S.fork;
+
+  const cb = document.getElementById("comm");
+  cb.setAttribute("aria-pressed", String(S.showComm));
+  cb.textContent = S.showComm ? "Hide commissions" : "Show commissions";
+
+  const rin = document.getElementById("rate");
+  if (document.activeElement !== rin) rin.value = S.rateRaw;
+  rin.placeholder = S.liveRate ? S.liveRate.toFixed(4) : "loading…";
+
+  document.getElementById("rate-src").textContent =
+    S.customRate !== null ? "custom rate"
+    : S.liveRate ? `live · ${S.liveSrc}`
+    : S.liveSrc === "unavailable" ? "live rate unavailable, type one"
+    : "";
+  document.getElementById("rate-live").hidden = S.customRate === null;
+
+  document.getElementById("theme").textContent =
+    document.documentElement.dataset.theme === "light" ? "Dark theme" : "Light theme";
 }
 
-function onForkChange() {
-  forkType = document.getElementById("fork-type").value;
-  // Auto-set back/lay for 1-X2 and 1X-2
-  if (forkType === "1-X2" && rows.length >= 2) {
-    rows[0].betType = "back"; rows[1].betType = "lay";
-  } else if (forkType === "1X-2" && rows.length >= 2) {
-    rows[0].betType = "lay"; rows[1].betType = "back";
-  } else {
-    // All back for other types
-    rows.forEach(r => { if(forkType!=="1-X2"&&forkType!=="1X-2") r.betType="back"; });
-  }
-  calc(); buildTable();
-}
+function drawTable(md) {
+  const thead = document.getElementById("thead");
+  const tbody = document.getElementById("tbody");
+  const tfoot = document.getElementById("tfoot");
 
-// ====================== OUTCOMES ======================
-(function createOutcomeBtns() {
-  const wrap = document.getElementById("outcome-btns");
-  [2,3,4,5,6].forEach(n => {
-    const b = document.createElement("button");
-    b.className = "btn" + (n === numOut ? " on" : "");
-    b.textContent = n;
-    b.onclick = () => {
-      numOut = n;
-      while (rows.length < numOut) rows.push(makeRow(nextId++));
-      rows = rows.slice(0, numOut);
-      wrap.querySelectorAll(".btn").forEach(x => x.classList.remove("on"));
-      b.classList.add("on");
-      buildForkSelect();
-      calc(); buildTable();
-    };
-    wrap.appendChild(b);
-  });
-  buildForkSelect();
-})();
-
-function toggleShowComm() {
-  showComm = !showComm;
-  const btn = document.getElementById("show-comm-btn");
-  btn.textContent = showComm ? "Hide commissions" : "Show commissions";
-  btn.classList.toggle("on", showComm);
-  buildTable();
-}
-
-// ====================== CALC ======================
-function calc() {
-  const effArr = rows.map(r =>
-    calcEffOdds(parseFloat(r.odds), parseFloat(r.comm)||0, r.betType, r.usePoly, r.cat)
-  );
-  if (!effArr.every(o => o !== null && o > 1)) { result = null; return; }
-
-  const invSum  = effArr.reduce((s,o) => s + 1/o, 0);
-  const margin  = invSum;
-  const isSurebet = margin < 1;
-
-  const fixIdx = rows.findIndex(r => r.isFixed);
-  let target;
-  if (fixIdx >= 0) {
-    const fRow = rows[fixIdx];
-    const raw  = parseFloat(fRow.fixedStake) || 0;
-    // Convert fixed stake to USD
-    let usdFixed;
-    if (fRow.currency === "USD") usdFixed = raw;
-    else if (fRow.currency === "BRL") { const r = getRate(); usdFixed = r ? raw / r : raw; }
-    else usdFixed = raw;
-    target = usdFixed * effArr[fixIdx];
-  } else {
-    const desiredTotal = totalStakeOverride !== null ? totalStakeOverride : 100;
-    target = desiredTotal / invSum;
-  }
-
-  let stakesUSD = effArr.map(o => target / o);
-
-  // Apply manual stake overrides (rows where user typed a value while another row is the anchor)
-  rows.forEach((r, i) => {
-    if (r.manualStake !== null && !r.isFixed) {
-      const raw = r.manualStake === "" ? null : parseFloat(r.manualStake);
-      if (raw !== null && !isNaN(raw)) {
-        let usdManual;
-        if (r.currency === "USD") usdManual = raw;
-        else if (r.currency === "BRL") { const rt = getRate(); usdManual = rt ? raw / rt : raw; }
-        else usdManual = raw;
-        stakesUSD[i] = usdManual;
-      }
-    }
-  });
-
-  if (roundValue > 0) {
-    stakesUSD = stakesUSD.map((s, i) => {
-      const row = rows[i];
-      const r = getRate();
-      if (roundUseFx && row.currency === "BRL" && r) {
-        const brl     = s * r;
-        const rounded = Math.ceil(brl / roundValue) * roundValue;
-        return rounded / r;
-      }
-      return Math.ceil(s / roundValue) * roundValue;
-    });
-  }
-
-  const totalUSD   = stakesUSD.reduce((a,b)=>a+b,0);
-  const returnsUSD = stakesUSD.map((s,i)=>s*effArr[i]);
-  const profitsUSD = returnsUSD.map(r=>r-totalUSD);
-  const minProfit  = Math.min(...profitsUSD);
-  const roi        = totalUSD ? (minProfit / totalUSD) * 100 : 0;
-
-  result = { margin, isSurebet, effArr, stakesUSD, totalUSD, returnsUSD, profitsUSD, minProfit, roi };
-}
-
-// ====================== TABLE ======================
-function buildTable() {
-  calc();
-
-  // HEADER
-  let h = `<tr>
-    <th style="width:28px">#</th>
-    <th class="ctr-col" style="width:50px">B/L</th>
-    <th>Odds</th>
-    <th class="num-col">Prob%</th>`;
-  if (showComm) h += `<th>Comm %</th><th class="num-col">Eff.Odds</th>`;
-  h += `
-    <th class="poly-th ctr-col">Polymarket</th>
-    <th class="poly-th">Category</th>
-    <th class="poly-th num-col">Taker Fee</th>
-    <th class="ctr-col">Currency</th>
-    <th>Stake</th>
-    <th class="ctr-col" style="width:44px">Fix</th>
-    <th class="num-col">Profit</th>
+  let head = `<tr>
+    <th class="c" scope="col">#</th>
+    <th class="c" scope="col">Side</th>
+    <th scope="col">Odds</th>
+    <th class="r" scope="col">Implied</th>`;
+  if (S.showComm) head += `<th class="r" scope="col">Comm %</th><th class="r" scope="col">Net odds</th>`;
+  head += `
+    <th class="c poly" scope="col">Polymarket fee</th>
+    <th class="poly" scope="col">Category</th>
+    <th class="r poly" scope="col">Taker fee</th>
+    <th class="c" scope="col">Currency</th>
+    <th class="r" scope="col">Stake</th>
+    <th class="c" scope="col">Lock</th>
+    <th class="r" scope="col">Profit if it hits</th>
   </tr>`;
-  document.getElementById("thead").innerHTML = h;
+  thead.innerHTML = head;
 
-  document.getElementById("tbody").innerHTML = rows.map((row, idx) => {
-    const cur     = row.currency;
-    const isLay   = row.betType === "lay";
-    const catOpts = CAT_KEYS.map(k =>
-      `<option value="${k}"${row.cat===k?" selected":""}>${k}</option>`
-    ).join("");
+  tbody.innerHTML = S.rows.map((r, i) => {
+    const lay  = r.bt === "lay";
+    const raw  = num(r.odds);
+    const leg  = md.legs[i];
+    const cur  = r.cur;
+    const sUsd = md.ok ? md.x[i] : null;
 
-    let commCols = "";
-    if (showComm) {
-      const raw = parseFloat(row.odds) || 0;
-      const eff = result ? result.effArr[idx] : null;
-      commCols = `
-        <td><input type="number" min="-40" max="40" step="0.01" value="${row.comm}"
-          style="width:70px;text-align:center"
-          oninput="onCommInput(${row.id},this.value)"></td>
-        <td class="num-col" id="ao-${row.id}" style="font-size:12px">
-          ${eff ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px">${eff.toFixed(4)}</span>` : "—"}
-        </td>`;
+    let stakeText;
+    if (r.manual !== null) stakeText = r.manual;
+    else if (r.fixed)      stakeText = r.fixedVal;
+    else {
+      const d = sUsd === null ? null : toDisp(sUsd, cur);
+      stakeText = d === null ? "" : d.toFixed(2);
     }
 
-    // Liability for lay bets
-    let liabHtml = "";
-    if (isLay && result) {
-      const raw  = parseFloat(row.odds) || 0;
-      const s    = result.stakesUSD[idx];
-      const liab = s * (raw - 1);
-      const liabDisp = toDisplay(liab, cur);
-      liabHtml = `<div class="liab-badge">Liab: ${CURR_SYMS[cur]}${f2(liabDisp??liab)}</div>`;
+    const prob = raw > 1 ? (100 / raw).toFixed(1) + "%" : "—";
+
+    // Profit if this row's outcome hits
+    const own = md.ok ? md.pnl[i] : null;
+    const ownDisp = own === null ? null : toDisp(own, cur);
+    let profitHtml = `<span class="muted">—</span>`;
+    if (ownDisp !== null) {
+      const alt = cur === "USD"
+        ? (rate() ? `≈ R$${(own * rate()).toFixed(2)}` : "")
+        : `≈ $${own.toFixed(2)}`;
+      profitHtml = `<span class="${own >= -0.005 ? "pos" : "neg"}">${signed(ownDisp, sym(cur))}</span>`
+                 + (alt ? `<span class="hint" style="display:block">${alt}</span>` : "");
     }
 
-    const stakeFixed = (row.isFixed || row.manualStake !== null) ? "stake-fixed" : "";
-    const stakeVal   = row.isFixed ? row.fixedStake
-      : row.manualStake !== null ? row.manualStake
-      : result ? (() => {
-          const v = toDisplay(result.stakesUSD[idx], cur);
-          return v !== null ? f2(v) : "";
-        })() : "";
+    // Hints under the stake
+    const hints = [];
+    if (lay && sUsd !== null && sUsd >= 0) {
+      const liab = toDisp(sUsd * (raw - 1), cur);
+      if (liab !== null) hints.push(`<span class="hint lay">Liab ${sym(cur)}${liab.toFixed(2)}</span>`);
+    }
+    if (!lay && r.poly && leg && sUsd !== null) {
+      hints.push(`<span class="hint">${(sUsd / leg.cost).toFixed(2)} shares</span>`);
+    }
+    if (sUsd !== null) {
+      if (cur === "USD" && rate()) hints.push(`<span class="hint">≈ R$${(sUsd * rate()).toFixed(2)}</span>`);
+      if (cur === "BRL")           hints.push(`<span class="hint">≈ $${sUsd.toFixed(2)}</span>`);
+    }
+
+    // Taker fee as % of cash spent (docs: f × (1 − p))
+    let feeTxt = `<span class="muted">—</span>`;
+    if (!lay && r.poly && raw > 1) {
+      const f = POLY[r.cat] ?? 0;
+      feeTxt = `${(f * (1 - 1 / raw) * 100).toFixed(2)}%`;
+    }
+
+    const commCols = S.showComm ? `
+      <td class="num" data-label="Comm %">
+        <input class="input w-sm num-in" type="text" inputmode="decimal" data-in="comm" data-id="${r.id}"
+          data-key="comm${r.id}" value="${esc(r.comm)}" aria-label="Commission %, outcome ${i + 1}">
+      </td>
+      <td class="num" data-label="Net odds">${!lay && leg ? leg.net.toFixed(3) : `<span class="muted">—</span>`}</td>` : "";
 
     return `
-    <tr class="${isLay?"is-lay":""}">
-      <td class="ctr-col" style="font:600 11px/1 'JetBrains Mono',monospace;color:var(--text3)">${idx+1}</td>
-      <td class="ctr-col">
-        <button class="bl-btn ${isLay?"lay":"back"}" onclick="toggleBL(${row.id})">${isLay?"−":"+"}</button>
+    <tr class="${lay ? "is-lay" : ""}">
+      <td class="c idx idx-cell" data-label="#">${i + 1}</td>
+      <td class="c" data-label="Side">
+        <button class="side ${lay ? "lay" : "back"}" type="button" data-act="side" data-id="${r.id}"
+          aria-label="Outcome ${i + 1}: ${lay ? "lay" : "back"}. Switch side.">${lay ? "Lay" : "Back"}</button>
       </td>
-      <td><input type="number" min="1.001" step="0.01" value="${row.odds}" style="width:88px;text-align:center"
-        placeholder="${isLay?"Lay odds":"Back odds"}"
-        oninput="onOddsInput(${row.id},this.value)"></td>
-      <td class="num-col" id="prob-${row.id}" style="font-size:12px">
-        ${(parseFloat(row.odds)||0) > 1 ? (100/(parseFloat(row.odds))).toFixed(1)+"%" : "—"}
+      <td data-label="Odds">
+        <input class="input w-odds" type="text" inputmode="decimal" data-in="odds" data-id="${r.id}"
+          data-key="odds${r.id}" value="${esc(r.odds)}" placeholder="${lay ? "Lay odds" : "Odds"}"
+          aria-label="Outcome ${i + 1} odds">
       </td>
+      <td class="num" data-label="Implied">${prob}</td>
       ${commCols}
-      <td class="poly-td ctr-col">
-        <input type="checkbox" ${row.usePoly&&!isLay?"checked":""} ${isLay?"disabled":""} onchange="onPolyChange(${row.id},this.checked)"Polymarket only for back bets":"Use Polymarket taker fee"}">
+      <td class="c poly" data-label="Polymarket">
+        ${lay ? `<span class="muted">back only</span>`
+              : `<input type="checkbox" data-act="poly" data-id="${r.id}" ${r.poly ? "checked" : ""}
+                   aria-label="Use Polymarket taker fee, outcome ${i + 1}" style="accent-color: var(--poly); width:16px; height:16px;">`}
       </td>
-      <td class="poly-td">
-        <select id="catsel-${row.id}" ${(row.usePoly&&!isLay)?"":"disabled"} onchange="onCatChange(${row.id},this.value)">${catOpts}</select>
+      <td class="poly" data-label="Category">
+        <select class="input" data-act="cat" data-id="${r.id}" ${(!r.poly || lay) ? "disabled" : ""}
+          aria-label="Polymarket category, outcome ${i + 1}">
+          ${CATS.map(c => `<option value="${esc(c)}"${r.cat === c ? " selected" : ""}>${esc(c)}</option>`).join("")}
+        </select>
       </td>
-      <td id="fee-${row.id}" class="poly-td num-col">
-        ${(!isLay && row.usePoly) ? (() => {
-          const fp = takerFeePct(parseFloat(row.odds)||0, parseFloat(row.comm)||0, row.cat);
-          return fp > 0 ? `<span class="fee-badge">${fp.toFixed(3)}%</span>` : `<span style="color:var(--text3)">—</span>`;
-        })() : `<span style="color:var(--text3)">—</span>`}
+      <td class="num poly" data-label="Taker fee">${feeTxt}</td>
+      <td class="c" data-label="Currency">
+        <button class="cur" type="button" data-act="cur" data-id="${r.id}" aria-label="Currency, outcome ${i + 1}">${cur === "BRL" ? "R$ BRL" : "$ USD"}</button>
       </td>
-      <td class="ctr-col">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-          <button class="cur-btn" id="curbtn-${row.id}" onclick="cycleCur(${row.id})">${cur==="USD"?"$ USD":"R$ BRL"}</button>
-          ${cur==="USD" ? `<div style="display:flex;align-items:center;gap:3px">
-            <span style="font:400 9px/1 'JetBrains Mono',monospace;color:var(--text3)">R$/&dollar;</span>
-            <input type="number" min="0.01" step="any"
-              style="width:64px;font-size:11px;padding:3px 5px;text-align:right"
-              placeholder="${rates.BRL ? rates.BRL.toFixed(4) : 'rate'}"
-              value="${row.customRate !== null ? row.customRate : ''}"
-              oninput="onCustomRate(${row.id},this.value)">
-          </div>` : ""}
+      <td data-label="Stake">
+        <div class="stake-cell">
+          <input class="input w-stake stake-in ${r.fixed ? "locked" : ""}" type="text" inputmode="decimal"
+            data-in="stake" data-id="${r.id}" data-key="stake${r.id}" value="${esc(stakeText)}"
+            placeholder="${lay ? "Backer stake" : "Stake"}" aria-label="Outcome ${i + 1} stake, ${cur}">
+          ${hints.join("")}
         </div>
       </td>
-      <td>
-        <div style="display:flex;flex-direction:column;gap:3px">
-          <div style="display:flex;align-items:center;gap:4px">
-            <span id="cursym-${row.id}" style="font:400 11px/1 'JetBrains Mono',monospace;color:var(--text3);min-width:20px;display:inline-block;text-align:right">${CURR_SYMS[cur]}</span>
-            <input type="number" id="stake-${row.id}" step="any" class="${stakeFixed}" style="width:92px;text-align:right"
-              oninput="onStakeInput(${row.id},this.value)"
-              value="${stakeVal}"
-              placeholder="${isLay?"Backer stake":"Your stake"}">
-          </div>
-          ${liabHtml}
-          <div id="brl-hint-${row.id}" class="dim" style="padding-left:2px;display:none"></div>
-          <div id="shares-hint-${row.id}" style="padding-left:2px;display:none;font:500 10px/1 'JetBrains Mono',monospace;color:var(--poly)"></div>
-        </div>
+      <td class="c" data-label="Lock">
+        <button class="lock" type="button" data-act="fix" data-id="${r.id}" aria-pressed="${r.fixed}"
+          aria-label="Lock stake, outcome ${i + 1}">${r.fixed ? "Locked" : "Lock"}</button>
       </td>
-      <td class="ctr-col" id="fixcell-${row.id}">
-        <button class="fix-btn ${row.isFixed?"fix-on":"fix-off"}" onclick="toggleFix(${row.id})">${row.isFixed?"🔒":"🔓"}</button>
-      </td>
-      <td id="profit-${row.id}" class="num-col">—</td>
+      <td class="r" data-label="Profit if it hits">${profitHtml}</td>
     </tr>`;
   }).join("");
 
-  updateDisplay();
+  // Footer: total stake + guaranteed (lowest) profit
+  const before = 8 + (S.showComm ? 2 : 0);
+  const totalVal = S.total !== null ? S.totalRaw : (md.ok ? md.total.toFixed(2) : "");
+  let profitFoot = `<span class="muted">—</span>`;
+  if (md.ok && md.valid) {
+    const sub = rate() ? `<span class="hint" style="display:block">≈ R$${(md.minP * rate()).toFixed(2)}</span>` : "";
+    profitFoot = `<span class="${md.minP >= -0.005 ? "pos" : "neg"}" title="Lowest profit across all outcomes">${signed(md.minP, "$")}</span>${sub}`;
+  }
+  tfoot.innerHTML = `
+    <tr>
+      <td colspan="${before}" class="r"><span class="lab">Total stake, USD</span></td>
+      <td>
+        <input class="input w-stake" type="text" inputmode="decimal" data-in="total" data-key="total"
+          value="${esc(totalVal)}" placeholder="100" aria-label="Total stake in USD">
+      </td>
+      <td></td>
+      <td class="r" title="Lowest profit across all outcomes">${profitFoot}</td>
+    </tr>`;
 }
 
-function updateDisplay() {
-  const roiBadge = document.getElementById("roi-badge");
-  if (!result) {
-    document.getElementById("tfoot").innerHTML = "";
-    if (roiBadge) { roiBadge.style.display = "none"; }
+function drawHero(md) {
+  const st = document.getElementById("status");
+  const hero = document.getElementById("hero");
+  let state, text;
+
+  if (md.reason === "odds") {
+    state = "idle"; text = "Enter odds above 1.00 for every outcome";
+  } else if (md.reason === "lock") {
+    state = "idle"; text = "Locked stake is empty";
+  } else if (md.reason) {
+    state = "idle"; text = "No stake split for these odds";
+  } else if (!md.valid) {
+    state = "none"; text = "No valid split: one stake would be negative";
+  } else if (md.surebet) {
+    state = "arb";  text = "Surebet: the profit locks on every outcome";
+  } else {
+    state = "none"; text = "No arbitrage: at least one outcome loses";
+  }
+  st.dataset.state = state;
+  st.textContent = text;
+  hero.dataset.state = state;
+
+  const ok = md.ok && md.valid;
+  document.getElementById("roi").textContent =
+    ok ? (md.roi >= 0 ? "+" : "−") + Math.abs(md.roi).toFixed(2) + "%" : "—";
+  document.getElementById("profit").textContent = ok ? signed(md.minP, "$") : "—";
+  document.getElementById("profit-sub").textContent =
+    ok && rate() ? `≈ R$${(md.minP * rate()).toFixed(2)}` : "";
+  document.getElementById("total").textContent = md.ok ? "$" + md.total.toFixed(2) : "—";
+}
+
+function drawWarn() {
+  const w = document.getElementById("warn");
+  const msgs = [];
+  if (S.rows.some(r => r.cur === "BRL") && !rate()) {
+    msgs.push("BRL rows need an exchange rate. Type one above, or wait for the live rate.");
+  }
+  w.hidden = msgs.length === 0;
+  w.textContent = msgs.join(" ");
+}
+
+// ═══════════════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════════════
+function setOutcomes(n) {
+  S.n = n;
+  while (S.rows.length < n) S.rows.push(mk(S.nextId++));
+  S.rows = S.rows.slice(0, n);
+  if (!forksFor(n).some(f => f.id === S.fork)) S.fork = forksFor(n)[0].id;
+}
+
+function onFork(v) {
+  S.fork = v;
+  S.rows.forEach(r => { r.bt = "back"; });
+  if (v === "1-X2" && S.rows.length >= 2) {
+    S.rows[1].bt = "lay"; S.rows[1].poly = false;
+  } else if (v === "1X-2" && S.rows.length >= 2) {
+    S.rows[0].bt = "lay"; S.rows[0].poly = false;
+  }
+}
+
+function toggleSide(r) {
+  r.bt = r.bt === "back" ? "lay" : "back";
+  if (r.bt === "lay") r.poly = false;
+}
+
+function toggleLock(r) {
+  if (r.fixed) {
+    r.fixed = false; r.fixedVal = "";
     return;
   }
-
-  rows.forEach((row, i) => {
-    // Prob cell update
-    const probEl = document.getElementById(`prob-${row.id}`);
-    if (probEl) {
-      probEl.innerHTML = (parseFloat(row.odds)||0) > 1 ? (100/(parseFloat(row.odds))).toFixed(1)+"%" : "—";
-    }
-
-    // Fee cell update
-    const feeEl = document.getElementById(`fee-${row.id}`);
-    if (feeEl) {
-      const isLay = row.betType === "lay";
-      if (!isLay && row.usePoly) {
-        const fp = takerFeePct(parseFloat(row.odds)||0, parseFloat(row.comm)||0, row.cat);
-        feeEl.innerHTML = fp > 0 ? `<span class="fee-badge">${fp.toFixed(3)}%</span>` : `<span style="color:var(--text3)">—</span>`;
-      } else {
-        feeEl.innerHTML = `<span style="color:var(--text3)">—</span>`;
-      }
-    }
-
-    // Profit cell
-    const profEl = document.getElementById(`profit-${row.id}`);
-    if (profEl) {
-      const pUSD = result.profitsUSD[i];
-      const disp = toDisplay(pUSD, row.currency);
-      const sign = pUSD >= 0 ? "+" : "";
-      const cls  = pUSD >= -0.005 ? "pos" : "neg";
-      const sym  = CURR_SYMS[row.currency];
-      const main = disp !== null ? `${sign}${sym}${Math.abs(disp).toFixed(2)}` : `${sign}$${Math.abs(pUSD).toFixed(2)}`;
-      const sub  = row.currency !== "USD" && disp !== null ? `<div class="dim">${sign}$${f2(Math.abs(pUSD))}</div>` : "";
-      profEl.innerHTML = `<span class="${cls}">${main}</span>${sub}`;
-    }
-
-    // Stake
-    const stakeEl = document.getElementById(`stake-${row.id}`);
-    if (stakeEl && !row.isFixed && row.manualStake === null && document.activeElement !== stakeEl) {
-      const v = toDisplay(result.stakesUSD[i], row.currency);
-      stakeEl.value = v !== null ? f2(v) : "";
-    }
-
-    // BRL hint for USD rows (customRate freezes live rate while set)
-    const brlHint = document.getElementById(`brl-hint-${row.id}`);
-    if (brlHint && row.currency === "USD") {
-      const activeRate = getRate();
-      if (activeRate) {
-        const usdAmt = result.stakesUSD[i];
-        brlHint.textContent = `≈ R$${f2(usdAmt * activeRate)}`;
-        brlHint.style.display = "";
-      } else {
-        brlHint.style.display = "none";
-      }
-    } else if (brlHint) {
-      brlHint.style.display = "none";
-    }
-
-    // Shares hint for Polymarket rows
-    const sharesHint = document.getElementById(`shares-hint-${row.id}`);
-    if (sharesHint) {
-      const rawOdds = parseFloat(row.odds) || 0;
-      if (row.betType !== "lay" && row.usePoly && rawOdds > 1) {
-        const price  = 1 / rawOdds;          // e.g. 0.78 for 78c
-        const shares = result.stakesUSD[i] / price;
-        sharesHint.textContent = `${shares.toFixed(2)} shares`;
-        sharesHint.style.display = "";
-      } else {
-        sharesHint.style.display = "none";
-      }
-    }
-    if (row.betType === "lay") {
-      const raw  = parseFloat(row.odds) || 0;
-      const s    = result.stakesUSD[i];
-      const liab = s * (raw - 1);
-      const liabDisp = toDisplay(liab, row.currency);
-      const sym  = CURR_SYMS[row.currency];
-      // find existing liab-badge
-      const cell = document.getElementById(`stake-${row.id}`)?.closest("td");
-      if (cell) {
-        let badge = cell.querySelector(".liab-badge");
-        if (!badge) {
-          badge = document.createElement("div");
-          badge.className = "liab-badge";
-          cell.querySelector("div").appendChild(badge);
-        }
-        badge.textContent = `Liab: ${sym}${f2(liabDisp??liab)}`;
-      }
-    }
-  });
-
-  // Total stake input sync (don't override while user is editing)
-  const totalInput = document.getElementById("total-stake-input");
-  if (totalInput && document.activeElement !== totalInput) {
-    totalInput.value = f2(result.totalUSD);
-  }
-
-  // FOOTER
-  // Cols: # B/L Odds Prob% [Comm% Eff.Odds] Poly Cat Fee Currency Stake Fix Profit
-  const colCount = 11 + (showComm ? 2 : 0);
-  const colsBeforeStake = colCount - 3; // exclude Stake, Fix, Profit
-  const totalInputActive = document.activeElement?.id === "total-stake-input";
-
-  if (!totalInputActive) {
-    document.getElementById("tfoot").innerHTML = `
-      <tr>
-        <td colspan="${colsBeforeStake}" style="text-align:right;color:var(--text2);font:500 12px/1 'DM Sans',sans-serif">
-          Total stake (USD):</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:4px">
-            <span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:11px;min-width:20px;display:inline-block;text-align:right">$</span>
-            <input type="number" id="total-stake-input" min="0.01" step="any"
-              value="${f2(result.totalUSD)}"
-              style="width:92px;text-align:right;font-weight:700"
-              oninput="onTotalStakeInput(this.value)">
-          </div>
-        </td>
-        <td></td>
-        <td class="num-col" id="tfoot-profit">
-          <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
-          ${getRate()?`<div class="dim">R$${f2(result.minProfit*getRate())}</div>`:""}
-        </td>
-      </tr>`;
-  } else {
-    // Only update the profit cell without touching the focused input
-    const profitCell = document.getElementById("tfoot-profit");
-    if (profitCell) {
-      profitCell.innerHTML = `
-        <span class="${result.minProfit>=0?"pos":"neg"}">${result.minProfit>=0?"+":""}\$${f2(Math.abs(result.minProfit))}</span>
-        ${getRate()?`<div class="dim">R$${f2(result.minProfit*getRate())}</div>`:""}`;
-    }
-  }
-
-  // ROI BADGE (top-right)
-  if (roiBadge) {
-    roiBadge.style.display = "";
-    roiBadge.textContent = result.roi.toFixed(2) + "%";
-    const roiClass = result.isSurebet ? "arb" : (Math.abs(result.roi) < 0.005 ? "neutral" : "noarb");
-    roiBadge.className = "roi-badge " + roiClass;
-  }
-
-  document.getElementById("brl-warn").style.display =
-    (rows.some(r=>r.currency==="BRL") && !getRate()) ? "" : "none";
+  // Read the current solved stake before the locks change
+  const md = model();
+  const idx = S.rows.indexOf(r);
+  const cur = md.ok ? toDisp(md.x[idx], r.cur) : null;
+  const value = r.manual !== null && r.manual.trim() !== "" ? r.manual
+              : cur !== null ? cur.toFixed(2) : "";
+  S.rows.forEach(x => { x.fixed = false; x.fixedVal = ""; x.manual = null; });
+  S.total = null; S.totalRaw = "";
+  r.fixed = true; r.fixedVal = value;
 }
 
-// ====================== HANDLERS ======================
-function onOddsInput(id, val)  { rows.find(r=>r.id===id).odds = val; calc(); updateDisplay(); }
-function onCommInput(id, val)  { rows.find(r=>r.id===id).comm = val; calc(); updateDisplay(); }
-function onPolyChange(id, checked) {
-  const row = rows.find(r=>r.id===id);
-  row.usePoly = checked;
-  const sel = document.getElementById(`catsel-${id}`);
-  if (sel) sel.disabled = !checked;
-  calc(); buildTable();
-}
-function onCatChange(id, val) { rows.find(r=>r.id===id).cat = val; calc(); updateDisplay(); }
-
-function onStakeInput(id, val) {
-  const row = rows.find(r=>r.id===id);
-  totalStakeOverride = null;
-
-  if (row.isFixed) {
-    // Row already explicitly fixed — update the anchor value
-    row.fixedStake = val;
-  } else {
-    // Never auto-fix on typing; store as manual override only
-    row.manualStake = (val === "" || val === null) ? null : val;
-  }
-  calc(); updateDisplay();
-}
-
-function toggleBL(id) {
-  const row = rows.find(r=>r.id===id);
-  row.betType = row.betType === "back" ? "lay" : "back";
-  if (row.betType === "lay") { row.usePoly = false; } // poly only for back
-  calc(); buildTable();
-}
-
-function cycleCur(id) {
-  const row = rows.find(r=>r.id===id);
-  const order = ["USD","BRL"];
-  const next  = order[(order.indexOf(row.currency)+1) % order.length];
-  row.customRate = null;
-  globalCustomRate = null; // reset global custom rate on currency change
-  if (row.isFixed && row.fixedStake) {
-    // convert fixed stake to new currency
-    const usd = toUSD(parseFloat(row.fixedStake), row.currency);
-    row.fixedStake = f2(fromUSD(usd, next) ?? usd);
-  }
-  if (row.manualStake !== null && row.manualStake !== "") {
-    const usd = toUSD(parseFloat(row.manualStake), row.currency);
-    row.manualStake = f2(fromUSD(usd, next) ?? usd);
-  }
-  row.currency = next;
-  calc(); buildTable();
-}
-
-function toUSD(amt, cur) {
-  if (cur==="USD") return amt;
-  if (cur==="BRL") { const r = getRate(); return r ? amt / r : amt; }
-  return amt;
-}
-function fromUSD(usd, cur) {
-  if (cur==="USD") return usd;
-  if (cur==="BRL") { const r = getRate(); return r ? usd * r : null; }
-  return null;
-}
-
-function toggleFix(id) {
-  const row = rows.find(r=>r.id===id);
-  if (row.isFixed) {
-    row.isFixed = false; row.fixedStake = "";
-  } else {
-    rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; });
-    totalStakeOverride = null;
-    row.isFixed = true;
-    // Prefer: already-typed manual stake → current DOM input value → calc result
-    const stakeEl = document.getElementById(`stake-${id}`);
-    const typedVal = row.manualStake !== null && row.manualStake !== ""
-      ? row.manualStake
-      : (stakeEl && stakeEl.value !== "" ? stakeEl.value : null);
-    if (typedVal !== null) {
-      row.fixedStake = typedVal;
-    } else {
-      const idx  = rows.indexOf(row);
-      const usd  = result ? result.stakesUSD[idx] : 0;
-      const disp = fromUSD(usd, row.currency);
-      row.fixedStake = f2(disp ?? usd);
-    }
-    row.manualStake = null;
-  }
-  calc(); buildTable();
-}
-
-function onCustomRate(id, val) {
-  const row = rows.find(r=>r.id===id);
-  const parsed = (val === "" || val === null) ? null : parseFloat(val) || null;
-  row.customRate = parsed;
-  globalCustomRate = parsed;
-  calc(); updateDisplay();
-}
-
-function onTotalStakeInput(val) {
-  const parsed = parseFloat(val);
-  if (!isNaN(parsed) && parsed > 0) {
-    totalStakeOverride = parsed;
-    rows.forEach(r => { r.isFixed = false; r.fixedStake = ""; r.manualStake = null; });
-    calc(); updateDisplay();
-  } else if (val === "" || val === null) {
-    totalStakeOverride = null;
-    calc(); updateDisplay();
-  }
-}
-
-// ====================== UTILITIES ======================
-// ====================== SHARE ODDS ======================
-function shareOdds() {
-  if (!rows.some(r => r.odds)) return alert("Enter odds first.");
-  const params = new URLSearchParams();
-  params.set("n", numOut);
-  params.set("ft", forkType);
-  rows.forEach((r, i) => {
-    params.set(`o${i}`, r.odds);
-    params.set(`c${i}`, r.comm);
-    params.set(`bt${i}`, r.betType);
-    params.set(`poly${i}`, r.usePoly ? "1" : "0");
-    params.set(`cat${i}`, r.cat);
-    params.set(`cur${i}`, r.currency);
-    params.set(`fx${i}`, r.isFixed ? "1" : "0");
-    if (r.isFixed && r.fixedStake) params.set(`fxs${i}`, r.fixedStake);
-    if (r.customRate !== null) params.set(`cr${i}`, r.customRate);
-  });
-  const url = `${location.origin}${location.pathname}?${params.toString()}`;
-  navigator.clipboard.writeText(url).then(() => {
-    const btn = document.getElementById("copy-btn");
-    const orig = btn.textContent;
-    btn.textContent = "✅ Link copied!";
-    setTimeout(() => btn.textContent = orig, 2000);
-  }).catch(() => {
-    prompt("Copy this link:", url);
-  });
-}
-
-function loadFromURL() {
-  const params = new URLSearchParams(location.search);
-  if (!params.has("n")) return;
-  const n = parseInt(params.get("n")) || 2;
-  numOut = n;
-  forkType = params.get("ft") || "1-2";
-  rows = [];
-  for (let i = 0; i < n; i++) {
-    const r = makeRow(i + 1);
-    r.odds    = params.get(`o${i}`)   || "";
-    r.comm    = params.get(`c${i}`)   || "0";
-    r.betType = params.get(`bt${i}`)  || "back";
-    r.usePoly = params.get(`poly${i}`) === "1";
-    r.cat     = params.get(`cat${i}`) || "Sports";
-    r.currency= params.get(`cur${i}`) || "USD";
-    r.isFixed = params.get(`fx${i}`) === "1";
-    r.fixedStake = r.isFixed ? (params.get(`fxs${i}`) || "") : "";
-    r.customRate = params.has(`cr${i}`) ? parseFloat(params.get(`cr${i}`)) || null : null;
-    rows.push(r);
-  }
-  nextId = n + 1;
-  document.querySelectorAll("#outcome-btns button").forEach(b =>
-    b.classList.toggle("on", parseInt(b.textContent) === n)
-  );
-  buildForkSelect();
-  document.getElementById("fork-type").value = forkType;
-  calc(); buildTable();
+function cycleCur(r) {
+  const next = r.cur === "USD" ? "BRL" : "USD";
+  if (r.fixed) r.fixedVal = convertStr(r.fixedVal, r.cur, next);
+  if (r.manual !== null) r.manual = convertStr(r.manual, r.cur, next);
+  r.cur = next;
 }
 
 function resetAll() {
-  numOut = 2; forkType = "1-2";
-  rows = [makeRow(1), makeRow(2)];
-  nextId = 3; roundValue = 0; roundUseFx = false; totalStakeOverride = null;
-  globalCustomRate = null;
-  document.querySelectorAll("#outcome-btns button").forEach(b => b.classList.toggle("on", b.textContent==="2"));
-  buildForkSelect();
-  showComm = false;
-  document.getElementById("show-comm-btn").textContent = "Show commissions";
-  document.getElementById("show-comm-btn").classList.remove("on");
-  calc(); buildTable();
+  S.n = 2; S.fork = "1-2"; S.showComm = false;
+  S.rows = [mk(1), mk(2)]; S.nextId = 3;
+  S.total = null; S.totalRaw = "";
+  S.customRate = null; S.rateRaw = "";
 }
 
-// ====================== INIT ======================
-setInterval(fetchRates, 5000);
-fetchRates();
+function shareOdds(btn) {
+  const p = new URLSearchParams();
+  p.set("n", S.n);
+  p.set("ft", S.fork);
+  if (S.customRate !== null) p.set("rate", S.rateRaw);
+  if (S.total !== null) p.set("t", S.totalRaw);
+  S.rows.forEach((r, i) => {
+    p.set(`o${i}`, r.odds);
+    p.set(`c${i}`, r.comm);
+    p.set(`bt${i}`, r.bt);
+    p.set(`poly${i}`, r.poly ? "1" : "0");
+    p.set(`cat${i}`, r.cat);
+    p.set(`cur${i}`, r.cur);
+    p.set(`fx${i}`, r.fixed ? "1" : "0");
+    if (r.fixed) p.set(`fxs${i}`, r.fixedVal);
+  });
+  const url = `${location.origin}${location.pathname}?${p}`;
+  const flash = t => { const o = btn.textContent; btn.textContent = t; setTimeout(() => btn.textContent = o, 1800); };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => flash("Link copied"), () => prompt("Copy this link:", url));
+  } else {
+    prompt("Copy this link:", url);
+  }
+}
+
+function loadFromURL() {
+  const p = new URLSearchParams(location.search);
+  if (!p.has("n")) return;
+  const n = Math.min(6, Math.max(2, parseInt(p.get("n"), 10) || 2));
+  S.n = n;
+  const ft = p.get("ft");
+  S.fork = forksFor(n).some(f => f.id === ft) ? ft : forksFor(n)[0].id;
+  S.rows = Array.from({ length: n }, (_, i) => {
+    const r = mk(i + 1, clean(p.get(`o${i}`)));
+    r.comm = clean(p.get(`c${i}`)) || "0";
+    r.bt   = p.get(`bt${i}`) === "lay" ? "lay" : "back";
+    r.poly = p.get(`poly${i}`) === "1";
+    r.cat  = CATS.includes(p.get(`cat${i}`)) ? p.get(`cat${i}`) : "Sports";
+    r.cur  = p.get(`cur${i}`) === "BRL" ? "BRL" : "USD";
+    r.fixed = p.get(`fx${i}`) === "1";
+    r.fixedVal = r.fixed ? clean(p.get(`fxs${i}`)) : "";
+    return r;
+  });
+  S.nextId = n + 1;
+  if (p.has("rate")) {
+    S.rateRaw = clean(p.get("rate"));
+    const v = num(S.rateRaw);
+    S.customRate = v > 0 ? v : null;
+  }
+  if (p.has("t")) {
+    S.totalRaw = clean(p.get("t"));
+    const v = num(S.totalRaw);
+    S.total = v > 0 ? v : null;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  LIVE BRL RATE  (USD base)
+// ═══════════════════════════════════════════════════════
+async function loadRates() {
+  const sources = [
+    { name: "open.er-api.com", url: "https://open.er-api.com/v6/latest/USD",                  pick: d => d?.rates?.BRL },
+    { name: "Frankfurter (ECB)", url: "https://api.frankfurter.dev/v1/latest?base=USD&symbols=BRL", pick: d => d?.rates?.BRL },
+  ];
+  for (const s of sources) {
+    try {
+      const res = await fetch(s.url, { cache: "no-store" });
+      if (!res.ok) continue;
+      const v = s.pick(await res.json());
+      if (v > 0) { S.liveRate = v; S.liveSrc = s.name; render(); return; }
+    } catch (_) { /* try the next source */ }
+  }
+  S.liveSrc = "unavailable";
+  render();
+}
+
+// ═══════════════════════════════════════════════════════
+//  EVENTS  (delegated, no inline handlers)
+// ═══════════════════════════════════════════════════════
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el) return;
+  const act = el.dataset.act;
+  const row = el.dataset.id !== undefined ? S.rows.find(r => r.id === Number(el.dataset.id)) : null;
+
+  switch (act) {
+    case "n":         setOutcomes(Number(el.dataset.n)); break;
+    case "comm":      S.showComm = !S.showComm; break;
+    case "side":      if (row) toggleSide(row); break;
+    case "fix":       if (row) toggleLock(row); break;
+    case "cur":       if (row) cycleCur(row); break;
+    case "rate-live": S.customRate = null; S.rateRaw = ""; break;
+    case "reset":     resetAll(); break;
+    case "theme": {
+      const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem("surebet-theme", next); } catch (_) {}
+      break;
+    }
+    case "share":     shareOdds(el); return;
+    default: return;
+  }
+  render();
+});
+
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "fork") { onFork(t.value); render(); return; }
+  if (!t.dataset || !t.dataset.act) return;
+  const row = S.rows.find(r => r.id === Number(t.dataset.id));
+  if (!row) return;
+  if (t.dataset.act === "poly") row.poly = t.checked;
+  if (t.dataset.act === "cat")  row.cat = t.value;
+  render();
+});
+
+document.addEventListener("input", e => {
+  const t = e.target;
+  const kind = t.dataset ? t.dataset.in : undefined;
+  if (!kind) return;
+
+  const v = clean(t.value);
+  if (v !== t.value) t.value = v;
+
+  const row = t.dataset.id !== undefined ? S.rows.find(r => r.id === Number(t.dataset.id)) : null;
+  switch (kind) {
+    case "odds": if (row) row.odds = v; break;
+    case "comm": if (row) row.comm = v; break;
+    case "stake":
+      if (!row) break;
+      if (row.fixed) row.fixedVal = v;
+      else row.manual = v.trim() === "" ? null : v;
+      S.total = null; S.totalRaw = "";
+      break;
+    case "total": {
+      S.totalRaw = v;
+      const p = num(v);
+      if (v.trim() === "") S.total = null;
+      else if (p > 0) {
+        S.total = p;
+        S.rows.forEach(x => { x.fixed = false; x.fixedVal = ""; x.manual = null; });
+      }
+      break;
+    }
+    case "rate": {
+      S.rateRaw = v;
+      const p = num(v);
+      S.customRate = (v.trim() === "" || !(p > 0)) ? null : p;
+      break;
+    }
+  }
+  render();
+});
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+try {
+  const t = localStorage.getItem("surebet-theme");
+  if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+} catch (_) {}
+
+S.rows = [mk(1), mk(2)];
+S.nextId = 3;
 loadFromURL();
-buildTable();
-
-// button initial states — show-comm is OFF by default
-document.getElementById("show-comm-btn").textContent = "Show commissions";
-document.getElementById("show-comm-btn").classList.remove("on");
-
-// theme persistence
-const storedTheme = localStorage.getItem("darkMode");
-if (storedTheme !== null) { darkMode = storedTheme === "true"; }
-document.body.classList.toggle("light", !darkMode);
-document.getElementById("theme-btn").textContent = darkMode ? "☀️ Light" : "🌙 Dark";
+render();
+loadRates();
+setInterval(loadRates, 60000);
 </script>
 </body>
 </html>
